@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Open WhatsApp after short delay
     setTimeout(() => {
-      window.open(`https://wa.me/5491100000000?text=${waMsg}`, '_blank');
+      window.open(`https://wa.me/5219811683822?text=${waMsg}`, '_blank');
     }, 800);
   });
 
