@@ -681,7 +681,7 @@ input, textarea, select { font-family: inherit; }
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  padding: 2.5rem;
 }
 .gc-green  { background: linear-gradient(135deg, #d8f0d0, #a8d8a0); }
 .gc-purple { background: linear-gradient(135deg, #e8d8f8, #c8a8e8); }
