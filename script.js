@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
    /* =============================================
      7. FORM VALIDATION & SUBMIT (FIXED FOR GITHUB)
-  ============================================= */
+  ============================================= 
   const form       = document.getElementById('orderForm');
   const submitBtn  = document.getElementById('submitBtn');
   const formSucc   = document.getElementById('formSuccess');
@@ -246,10 +246,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     return valid;
   }
-
-  /* =============================================
+*/
+ /* =============================================
      7. FORM VALIDATION & SUBMIT
-  ============================================= 
+  ============================================= */
   const form       = document.getElementById('orderForm');
   const submitBtn  = document.getElementById('submitBtn');
   const btnText    = document.getElementById('btnText');
@@ -349,7 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 4. CAMBIO CLAVE: Usar location.href en lugar de window.open
     // Esto evita que el bloqueador de pop-ups detenga la acción
-    const whatsappUrl = `https://wa.me/5491100000000?text=${waMsg}`;
+    const whatsappUrl = `https://wa.me/5219811683822?text=${waMsg}`;
     
     // Mostramos el éxito en la web
     submitBtn.classList.remove('loading');
