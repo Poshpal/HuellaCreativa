@@ -274,6 +274,59 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* =============================================
+     8.5. MODAL VIDEO GALERÍA
+  ============================================= */
+  const galleryVideoModal = document.getElementById('galleryVideoModal');
+  const galleryVideoEl    = document.getElementById('galleryVideoModalVideo');
+  const galleryModalClose = document.querySelector('.gallery-video-modal-close');
+  const galleryModalBack  = document.querySelector('.gallery-video-modal-backdrop');
+
+  function closeGalleryVideo() {
+    if (!galleryVideoModal || !galleryVideoEl) return;
+    galleryVideoEl.pause();
+    galleryVideoEl.removeAttribute('src');
+    galleryVideoEl.load();
+    galleryVideoModal.classList.remove('open');
+    galleryVideoModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  function openGalleryVideo(src) {
+    const url = (src && typeof src === 'string') ? src.trim() : '';
+    if (!url || !galleryVideoModal || !galleryVideoEl) return;
+
+    // Si el archivo no se puede cargar (404 / ruta incorrecta), cerramos el modal.
+    const onError = () => {
+      galleryVideoEl.removeEventListener('error', onError);
+      closeGalleryVideo();
+    };
+    galleryVideoEl.addEventListener('error', onError);
+
+    galleryVideoEl.src = url;
+    galleryVideoModal.classList.add('open');
+    galleryVideoModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    galleryVideoEl.play().catch(() => {});
+  }
+
+  // Click en cada tarjeta: abrir modal solo si hay data-video
+  document.querySelectorAll('.gallery-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const videoSrc = card.getAttribute('data-video');
+      if (!videoSrc || !String(videoSrc).trim()) return;
+      openGalleryVideo(videoSrc);
+    });
+  });
+
+  if (galleryModalClose) galleryModalClose.addEventListener('click', closeGalleryVideo);
+  if (galleryModalBack) galleryModalBack.addEventListener('click', closeGalleryVideo);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && galleryVideoModal && galleryVideoModal.classList.contains('open')) {
+      closeGalleryVideo();
+    }
+  });
+
+  /* =============================================
      9. PRODUCT CARD HOVER SPARKLE
   ============================================= */
   document.querySelectorAll('.product-card').forEach(card => {
