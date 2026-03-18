@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // 3. CAMBIO CLAVE PARA GITHUB PAGES / PRODUCCIÓN:
       // Usamos window.location.assign en lugar de window.open para evitar bloqueadores de popups
       // Reemplaza "5491100000000" con tu número real
-      const whatsappUrl = `https://wa.me/5491100000000?text=${waMsg}`;
+      const whatsappUrl = `https://wa.me/5219811683822?text=${waMsg}`;
 
       // 4. Mostrar mensaje de éxito en la web
       submitBtn.classList.remove('loading');
