@@ -683,12 +683,45 @@ input, textarea, select { font-family: inherit; }
   justify-content: center;
   padding: 2.5rem;
   overflow: hidden;
+  position: relative;
 }
 .gallery-img-wrap .gallery-image {
   width: 100%;
   height: 100%;
   object-fit: contain;     /* evita recortes: se muestra completa */
   object-position: center; /* centrada dentro del recuadro */
+}
+
+/* Hint / tooltip para indicar que el card reproduce un video */
+.gallery-video-hint {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -52%);
+  z-index: 2;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-weight: 900;
+  font-size: .95rem;
+  padding: .55rem 1rem;
+  border-radius: 999px;
+  opacity: 0;
+  transition: opacity var(--transition), transform var(--transition);
+  white-space: nowrap;
+}
+
+.gallery-card:hover .gallery-video-hint,
+.gallery-card:focus .gallery-video-hint {
+  opacity: 1;
+  transform: translate(-50%, -56%);
+}
+
+.gallery-card:focus {
+  outline: none;
+}
+.gallery-card:focus-visible {
+  box-shadow: 0 0 0 4px rgba(78, 205, 196, .22), var(--shadow-hover);
 }
 .gc-green  { background: linear-gradient(135deg, #d8f0d0, #a8d8a0); }
 .gc-purple { background: linear-gradient(135deg, #e8d8f8, #c8a8e8); }
@@ -1259,6 +1292,11 @@ input, textarea, select { font-family: inherit; }
     object-fit: contain;
     object-position: center;
   }
+  /* En móvil no hay hover: mostramos el hint un poco para guiar al usuario */
+  .gallery-video-hint {
+    opacity: .95;
+    transform: translate(-50%, -56%);
+  }
 }
 
 /* ---- SCROLLBAR ---- */
@@ -1380,5 +1418,4 @@ input, textarea, select { font-family: inherit; }
   height: auto;
   display: block;
   background: var(--dark);
-  vertical-align: middle;
 }

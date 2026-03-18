@@ -316,6 +316,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!videoSrc || !String(videoSrc).trim()) return;
       openGalleryVideo(videoSrc);
     });
+
+    // Accesibilidad: abrir modal con teclado (Enter / Espacio)
+    card.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault();
+      const videoSrc = card.getAttribute('data-video');
+      if (!videoSrc || !String(videoSrc).trim()) return;
+      openGalleryVideo(videoSrc);
+    });
   });
 
   if (galleryModalClose) galleryModalClose.addEventListener('click', closeGalleryVideo);
