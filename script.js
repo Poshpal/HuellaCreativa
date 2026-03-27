@@ -175,6 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const petType   = document.getElementById('petType').value;
       const petBreed  = document.getElementById('petBreed').value.trim();
       const petAge    = document.getElementById('petAge').value.trim();
+      const petNicknames = document.getElementById('petNicknames').value.trim();
+      const petActivity = document.getElementById('petActivity').value.trim();
       const message   = document.getElementById('message').value.trim();
 
       const petTypeLabels = { gato: '🐱 Gato', perro: '🐕 Perro', otro: '🐾 Otro' };
@@ -187,7 +189,9 @@ document.addEventListener('DOMContentLoaded', () => {
         `🐾 Tipo: ${petTypeLabels[petType] || petType}\n` +
         (petBreed ? `🔖 Raza: ${petBreed}\n` : '') +
         (petAge   ? `📅 Edad: ${petAge}\n` : '') +
-        (message  ? `\n💬 Mensaje:\n${message}` : '')
+        (petNicknames ? `📝 Apodos: ${petNicknames}\n` : '') +
+        (petActivity ? `🏃 Actividad favorita: ${petActivity}\n` : '') +
+        (message  ? `\n💬 Mensaje/Datos extra:\n${message}` : '')
       );
 
       // Simular un pequeño retraso visual (opcional)
@@ -227,14 +231,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const phone     = document.getElementById('phone');
     const petName   = document.getElementById('petName');
     const petType   = document.getElementById('petType');
+    const petAge    = document.getElementById('petAge');
+    const petNicknames = document.getElementById('petNicknames');
+    const petActivity = document.getElementById('petActivity');
     const accept    = document.getElementById('accept');
 
     if (!ownerName.value.trim()) {
-      showError(ownerName, 'Por favor ingresá tu nombre.');
+      showError(ownerName, 'Por favor ingresa tu nombre.');
       valid = false;
     }
     if (!phone.value.trim()) {
-      showError(phone, 'Ingresá un número de contacto.');
+      showError(phone, 'Ingresa un número de contacto.');
       valid = false;
     }
     if (!petName.value.trim()) {
@@ -243,6 +250,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (!petType.value) {
       showError(petType, 'Seleccioná el tipo de mascota.');
+      valid = false;
+    }
+    if (!petAge.value.trim()) {
+      showError(petAge, 'La edad de tu mascota es requerida.');
+      valid = false;
+    }
+    if (!petNicknames.value.trim()) {
+      showError(petNicknames, 'Los apodos de tu mascota son requeridos.');
+      valid = false;
+    }
+    if (!petActivity.value.trim()) {
+      showError(petActivity, 'La actividad favorita de tu mascota es requerida.');
       valid = false;
     }
     if (!accept.checked) {

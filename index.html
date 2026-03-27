@@ -442,13 +442,26 @@
                 <input type="text" id="petBreed" name="petBreed" placeholder="Ej: Naranjoso, Labrador..." />
               </div>
               <div class="form-group">
-                <label for="petAge">Edad</label>
-                <input type="text" id="petAge" name="petAge" placeholder="Ej: 5 años" />
+                <label for="petAge">Edad *</label>
+                <input type="text" id="petAge" name="petAge" placeholder="Ej: 5 años" required/>
+                <span class="form-error" id="err-petAge"></span>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="petNicknames">Apodos *</label>
+                <input type="text" id="petNicknames" name="petNicknames" placeholder="Ej: Bebé, Bichita, etc." required/>
+                <span class="form-error" id="err-petNicknames"></span>
+              </div>
+              <div class="form-group">
+                <label for="petActivity">Actividad favorita *</label>
+                <input type="text" id="petActivity" name="petActivity" placeholder="Ej: Correr, Ladrar, etc." required/>
+                <span class="form-error" id="err-petActivity"></span>
               </div>
             </div>
             <div class="form-group">
               <label for="message">Datos extra / Mensaje</label>
-              <textarea id="message" name="message" rows="4" placeholder="Apodo, actividad favorita, color de ojos, características especiales... ¡Contanos todo sobre tu mascota! 🐾"></textarea>
+              <textarea id="message" name="message" rows="4" placeholder="Color de ojos, características especiales... ¡Cuéntanos todo sobre tu mascota! 🐾"></textarea>
             </div>
             <div class="form-check">
               <input type="checkbox" id="accept" name="accept" required />
