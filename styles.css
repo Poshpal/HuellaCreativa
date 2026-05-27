@@ -1053,6 +1053,22 @@ input, textarea, select { font-family: inherit; }
   margin-bottom: 1rem;
 }
 
+.product-detail-img {
+  width: min(100%, 460px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.product-detail-img img {
+  width: 100%;
+  height: clamp(300px, 38vw, 440px);
+  object-fit: contain;
+  object-position: center;
+  border-radius: 16px;
+}
+
 /* ---- TESTIMONIALS ---- */
 .testimonials-section {
   background: var(--gradient-test);

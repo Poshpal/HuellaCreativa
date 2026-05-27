@@ -487,6 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (!accept.checked) {
       accept.style.outline = '2px solid #e74c3c';
+      showError(accept, 'Acepta el anticipo para agendar el pedido.');
       valid = false;
     } else {
       accept.style.outline = '';
