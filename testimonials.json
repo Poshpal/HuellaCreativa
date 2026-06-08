@@ -19,7 +19,7 @@
     "rating": 5,
     "message": "Excelente servicio, calidad 10/10",
     "pet": "Mamá de Baxter🐕",
-    "image": "images/perrito5-caja.png",
+    "image": "images/testimonial-images/perrito5-caja.png",
     "alt": "PetPop de Baxter - Perro Pitbull",
     "place": "📍 Seybaplaya, Campeche"
   },
@@ -27,7 +27,7 @@
     "rating": 5,
     "message": "Panda vive lejos de mí, pero al ver su nombre en la caja, abrirla y examinar el diseño y su imagen cazando un colibrí, me hizo recordar sus travesuras. Cuando tomé entre mis manos a Doxito, fue como estar llenándome de sus pelos. Sencillamente, fantástico y emocionante",
     "pet": "Mamá de Panda🐈",
-    "image": "images/gatito3-caja.png",
+    "image": "images/testimonial-images/gatito3-caja.png",
     "alt": "PetPop de Panda - Gato",
     "place": "📍 Tuxtla Gutiérrez, Chiapas"
   },
@@ -43,7 +43,7 @@
     "rating": 5,
     "message": "Recomiendo ampliamente por su atención, calidad y la elaboración detallada de las mascotas.",
     "pet": "Papá de Katy🐕",
-    "image": "images/perrito8-caja.png",
+    "image": "images/testimonial-images/perrito8-caja.png",
     "alt": "PetPop de Katy - Perro",
     "place": "📍 Ciudad del Carmen, Campeche"
   },
@@ -54,5 +54,21 @@
     "image": "images/perrito7-caja.png",
     "alt": "PetPop de Canelo - Perro",
     "place": "📍 Ciudad del Carmen, Campeche"
+  },
+  {
+    "rating": 5,
+    "message": "Gracias por hacer de Dona un regalo de cumpleaños especial para mi hijo es una perrita muy amada por todos en la casa y muy consentida. Y que mejor recuerdo de ella que un petpop nos encantó",
+    "pet": "Mamá de Dona🐕",
+    "image": "images/perrito9-caja.png",
+    "alt": "PetPop de Dona - Perro",
+    "place": "📍 San Francisco de Campeche, Campeche"
+  },
+  {
+    "rating": 5,
+    "message": "Gracias por convertir a brownie en un petpop el es un perrito muy amado porque fue recatado, llego a la familia a darnos mucho amor y felicidad.",
+    "pet": "Mamá de Brownie🐕",
+    "image": "images/testimonial-images/brownie-caja.png",
+    "alt": "PetPop de Brownie - Perro",
+    "place": "📍 San Francisco de Campeche, Campeche"
   }
 ]
