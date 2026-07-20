@@ -411,6 +411,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const form       = document.getElementById('orderForm');
   const submitBtn  = document.getElementById('submitBtn');
   const formSucc   = document.getElementById('formSuccess');
+  const resetFormBtn = document.getElementById('resetFormBtn');
+
+  function resetOrderForm() {
+    if (!form) return;
+
+    form.reset();
+    form.querySelectorAll('input, select, textarea').forEach((field) => clearError(field));
+
+    const accept = document.getElementById('accept');
+    if (accept) accept.style.outline = '';
+
+    form.style.display = '';
+    if (formSucc) formSucc.classList.remove('visible');
+    if (submitBtn) {
+      submitBtn.classList.remove('loading');
+      submitBtn.disabled = false;
+    }
+
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  if (resetFormBtn) {
+    resetFormBtn.addEventListener('click', resetOrderForm);
+  }
 
   if (form) {
     // Real-time clear errors on input
@@ -470,9 +494,6 @@ document.addEventListener('DOMContentLoaded', () => {
       // Simular un pequeño retraso visual (opcional)
       await new Promise(resolve => setTimeout(resolve, 1200));
 
-      // 3. CAMBIO CLAVE PARA GITHUB PAGES / PRODUCCIÓN:
-      // Usamos window.location.assign en lugar de window.open para evitar bloqueadores de popups
-      // Reemplaza "5491100000000" con tu número real
       const whatsappUrl = `https://wa.me/5219811683822?text=${waMsg}`;
 
       // 4. Mostrar mensaje de éxito en la web
@@ -480,9 +501,8 @@ document.addEventListener('DOMContentLoaded', () => {
       form.style.display = 'none';
       formSucc.classList.add('visible');
 
-      // 5. Redirigir a WhatsApp
-      // Nota: assign() es más seguro contra bloqueadores que open() tras un proceso async
-      window.location.assign(whatsappUrl);
+      // Abrir WhatsApp solo en otra pestaña (sin redirigir la actual)
+      window.open(whatsappUrl, '_blank');
     });
   }
 

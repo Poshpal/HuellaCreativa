@@ -1625,6 +1625,13 @@ input, textarea, select { font-family: inherit; }
   margin-bottom: .5rem;
 }
 .form-success p { color: var(--gray); font-size: 1rem; }
+.form-success-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  justify-content: center;
+  margin-top: 1.25rem;
+}
 
 .order-info { display: flex; flex-direction: column; gap: 1rem; }
 .order-info-card {
