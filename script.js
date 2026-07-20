@@ -134,15 +134,11 @@ document.addEventListener('DOMContentLoaded', () => {
   ============================================= */
   const PRICE_UNIT = 400;
   const DISCOUNT_2 = 0.10;
-  const SHIPPING_COST = 160;
 
   const qtyBtns = document.querySelectorAll('.calc-qty-btn');
-  const includeShippingEl = document.getElementById('includeShipping');
   const subtotalEl = document.getElementById('priceSubtotal');
   const discountEl = document.getElementById('priceDiscount');
-  const shippingEl = document.getElementById('priceShipping');
   const totalEl = document.getElementById('priceTotal');
-  let currentQty = 1;
 
   function formatMXN(value) {
     const n = Math.round(value);
@@ -151,16 +147,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function setQty(qty) {
     const q = qty === 2 ? 2 : 1;
-    currentQty = q;
     const subtotal = PRICE_UNIT * q;
     const discount = q === 2 ? subtotal * DISCOUNT_2 : 0;
-    const shipping = includeShippingEl && includeShippingEl.checked ? SHIPPING_COST : 0;
-    const total = subtotal - discount + shipping;
+    const total = subtotal - discount;
 
     qtyBtns.forEach(btn => btn.classList.toggle('is-active', Number(btn.dataset.qty) === q));
     if (subtotalEl) subtotalEl.textContent = formatMXN(subtotal);
     if (discountEl) discountEl.textContent = formatMXN(discount);
-    if (shippingEl) shippingEl.textContent = formatMXN(shipping);
     if (totalEl) totalEl.textContent = formatMXN(total);
   }
 
@@ -168,9 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
     qtyBtns.forEach(btn => {
       btn.addEventListener('click', () => setQty(Number(btn.dataset.qty)));
     });
-    if (includeShippingEl) {
-      includeShippingEl.addEventListener('change', () => setQty(currentQty));
-    }
     setQty(1);
   }
 
