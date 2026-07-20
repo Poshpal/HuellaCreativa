@@ -7,11 +7,25 @@
 
 const SUPABASE_URL = 'https://walpqiwxbawdhllizxtw.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_Z6dG8LOXQZMxjgydCxOgxg_AEbMmXqE';
+const CLOUDINARY_IMAGE_BASE = 'https://res.cloudinary.com/xyzma0pz/image/upload/';
 
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
 );
+
+/** Une el public_id de Cloudinary (sin extensión) con la URL base. */
+function getCloudinaryImageUrl(image) {
+  if (!image) return '';
+  const value = String(image).trim();
+  if (/^https?:\/\//i.test(value)) return value;
+
+  // De "images/perrito4.png" → "perrito4"
+  const fileName = value.split('/').pop();
+  const publicId = fileName.replace(/\.(png|jpe?g|webp|gif)$/i, '');
+  console.log(`${CLOUDINARY_IMAGE_BASE}${publicId}`);
+  return `${CLOUDINARY_IMAGE_BASE}${publicId}`;
+}
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -761,7 +775,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!Array.isArray(data) || data.length === 0) {
       throw new Error('La tabla models está vacía o RLS bloquea la lectura');
     }
-    return data;
+
+    return data.map(model => ({
+      ...model,
+      image: getCloudinaryImageUrl(model.image),
+    }));
   }
 
   async function loadGalleryModels() {
