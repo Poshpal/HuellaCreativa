@@ -62,5 +62,12 @@
     "image": "images/perrito7.png",
     "alt": "PetPop de Canelo - Perro",
     "type": "Perro"
+  },
+  {
+    "name": "🐕 Perrito 8",
+    "image": "images/perrito10.png",
+    "alt": "PetPop de Denver - Perro",
+    "description": "Tipo Bullgog Francés",
+    "type": "Perro"
   }
 ]
