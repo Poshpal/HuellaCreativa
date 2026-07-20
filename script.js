@@ -386,6 +386,13 @@ document.addEventListener('DOMContentLoaded', () => {
         image: getCloudinaryImageUrl(item.image),
       }));
 
+      const heroImage = document.getElementById('heroProductImage');
+      const first = normalized[0];
+      if (heroImage && first?.image) {
+        heroImage.src = first.image;
+        heroImage.alt = first.alt || `PetPop de ${first.pet || 'mascota'}`;
+      }
+
       renderTestimonials(normalized);
       bindTestimonialDots();
       goTo(0);
