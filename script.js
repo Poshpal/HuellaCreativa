@@ -5,6 +5,14 @@
 
 'use strict';
 
+const SUPABASE_URL = 'https://walpqiwxbawdhllizxtw.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_Z6dG8LOXQZMxjgydCxOgxg_AEbMmXqE';
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
 document.addEventListener('DOMContentLoaded', () => {
 
   /* =============================================
@@ -501,7 +509,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* =============================================
-     8. MODELOS DISPONIBLES DESDE JSON
+     8. MODELOS DISPONIBLES DESDE SUPABASE
   ============================================= */
   const galleryGrid = document.getElementById('galleryGrid');
   const galleryTabsWrap = document.getElementById('galleryTabs');
@@ -743,14 +751,42 @@ document.addEventListener('DOMContentLoaded', () => {
     galleryDots = Array.from(galleryDotsWrap.querySelectorAll('.dot'));
   }
 
+  async function loadGalleryModelsFromJson() {
+    const response = await fetch('models.json');
+    if (!response.ok) throw new Error('No se pudo cargar models.json');
+    return response.json();
+  }
+
+  async function loadGalleryModelsFromSupabase() {
+    if (!supabaseClient) {
+      throw new Error('Cliente de Supabase no disponible');
+    }
+
+    const { data, error } = await supabaseClient
+      .from('models')
+      .select('name,image,alt,description,video,type')
+      .order('id', { ascending: true });
+
+    if (error) throw error;
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new Error('La tabla models está vacía o RLS bloquea la lectura');
+    }
+    return data;
+  }
+
   async function loadGalleryModels() {
     if (!galleryGrid || !galleryDotsWrap) return;
 
     try {
-      const response = await fetch('models.json');
-      if (!response.ok) throw new Error('No se pudo cargar models.json');
+      let models;
 
-      const models = await response.json();
+      try {
+        models = await loadGalleryModelsFromSupabase();
+      } catch (supabaseError) {
+        console.warn('No se pudieron cargar modelos desde Supabase. Usando models.json:', supabaseError);
+        models = await loadGalleryModelsFromJson();
+      }
+
       if (!Array.isArray(models) || models.length === 0) return;
 
       galleryModels = models;
@@ -935,7 +971,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   `;
   document.head.appendChild(activeLinkStyle);
-
-  console.log('%c🐾 Huella Creativa – PetPop Online', 'color:#FF6B35;font-size:1.2rem;font-weight:bold;');
 
 });
