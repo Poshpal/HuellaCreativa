@@ -70,5 +70,13 @@
     "image": "images/testimonial-images/brownie-caja.png",
     "alt": "PetPop de Brownie - Perro",
     "place": "📍 San Francisco de Campeche, Campeche"
+  },
+  {
+    "rating": 5,
+    "message": "Me encantó ❤️❤️❤️❤️❤️ 10 de 10",
+    "pet": "Mamá de Denver🐕",
+    "image": "images/perrito10-caja.png",
+    "alt": "PetPop de Denver - Perro",
+    "place": "📍 San Francisco de Campeche, Campeche"
   }
 ]
