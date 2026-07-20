@@ -342,17 +342,58 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
   }
 
+  async function loadTestimonialsFromJson() {
+    const response = await fetch('testimonials.json');
+    if (!response.ok) throw new Error('No se pudo cargar testimonials.json');
+    return response.json();
+  }
+
+  async function loadTestimonialsFromSupabase() {
+    if (!supabaseClient) {
+      throw new Error('Cliente de Supabase no disponible');
+    }
+
+    const { data, error } = await supabaseClient
+      .from('testimonials')
+      .select('rating,message,pet,image,alt,place')
+      .order('id', { ascending: false });
+
+    if (error) throw error;
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new Error('La tabla testimonials está vacía o RLS bloquea la lectura');
+    }
+    return data;
+  }
+
   async function loadTestimonials() {
     if (!track || !dotsWrap) return;
 
     try {
-      const response = await fetch('testimonials.json');
-      if (!response.ok) throw new Error('No se pudo cargar testimonials.json');
+      let testimonials;
 
-      const testimonials = await response.json();
+      try {
+        testimonials = await loadTestimonialsFromSupabase();
+      } catch (supabaseError) {
+        console.warn('No se pudieron cargar testimonios desde Supabase. Usando testimonials.json:', supabaseError);
+        testimonials = await loadTestimonialsFromJson();
+        testimonials = [...testimonials].reverse();
+      }
+
       if (!Array.isArray(testimonials) || testimonials.length === 0) return;
 
-      renderTestimonials([...testimonials].reverse());
+      const normalized = testimonials.map((item) => ({
+        ...item,
+        image: getCloudinaryImageUrl(item.image),
+      }));
+
+      const heroImage = document.getElementById('heroProductImage');
+      const first = normalized[0];
+      if (heroImage && first?.image) {
+        heroImage.src = first.image;
+        heroImage.alt = first.alt || `PetPop de ${first.pet || 'mascota'}`;
+      }
+
+      renderTestimonials(normalized);
       bindTestimonialDots();
       goTo(0);
       startAutoPlay();
