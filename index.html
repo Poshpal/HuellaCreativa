@@ -309,7 +309,7 @@
           </button>
           <div class="faq-answer">
             <p>Ofrecemos <strong>retiro en persona</strong> sin cargo adicional. También podemos enviarte por medio de mandaditos con costo extra, dependiendo de la distancia en Campeche y Seybaplaya.</p>
-            <p>Contamos con envíos a todo el país desde <strong>$160MXN</strong>. El packaging está diseñado para proteger la figura durante el traslado.</p>
+            <p>Contamos con envíos <strong>solamente dentro de México</strong> desde <strong>$160 MXN</strong>. El packaging está diseñado para proteger la figura durante el traslado.</p>
           </div>
         </div>
         <div class="faq-item card-reveal">
@@ -360,7 +360,6 @@
           <li>🎨 Pintado a mano</li>
           <li>🐾 Personalización total</li>
           <li>📦 Caja coleccionable personalizada</li>
-          <li>🚚 Envíos a todo el país desde <strong>$160 MXN</strong></li>
         </ul>
       </div>
 
@@ -372,11 +371,6 @@
           <button type="button" class="calc-qty-btn" data-qty="2">2 PetPops <span class="calc-discount-pill">-10%</span></button>
         </div>
 
-        <label class="calc-shipping-toggle">
-          <input type="checkbox" id="includeShipping" checked />
-          <span>Incluir envío a todo el país desde $160 MXN</span>
-        </label>
-
         <div class="calc-summary" aria-live="polite">
           <div class="calc-row">
             <span>Subtotal</span>
@@ -386,19 +380,23 @@
             <span>Descuento</span>
             <strong id="priceDiscount">$0 MXN</strong>
           </div>
-          <div class="calc-row">
-            <span>Envío desde</span>
-            <strong id="priceShipping">$160 MXN</strong>
-          </div>
           <div class="calc-divider"></div>
           <div class="calc-row total">
             <span>Total</span>
-            <strong id="priceTotal">$560 MXN</strong>
+            <strong id="priceTotal">$400 MXN</strong>
           </div>
         </div>
 
         <a href="#pedido" class="btn btn-primary btn-full">🎁 Pedir ahora</a>
         <p class="calc-note">Se requiere un anticipo de <strong></strong>$100MXN</strong> para agendar el pedido.</p>
+      </div>
+
+      <div class="shipping-card card-reveal delay-2">
+        <div class="shipping-card-icon">🚚</div>
+        <div class="shipping-card-text">
+          <h3 class="shipping-card-title">Envíos</h3>
+          <p>Realizamos envíos <strong>solamente dentro de México</strong> desde <strong>$160 MXN</strong>.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -624,6 +622,7 @@
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="script.js"></script>
 </body>
 </html>

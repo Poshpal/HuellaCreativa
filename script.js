@@ -5,6 +5,14 @@
 
 'use strict';
 
+const SUPABASE_URL = 'https://walpqiwxbawdhllizxtw.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_Z6dG8LOXQZMxjgydCxOgxg_AEbMmXqE';
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
 document.addEventListener('DOMContentLoaded', () => {
 
   /* =============================================
@@ -126,15 +134,11 @@ document.addEventListener('DOMContentLoaded', () => {
   ============================================= */
   const PRICE_UNIT = 400;
   const DISCOUNT_2 = 0.10;
-  const SHIPPING_COST = 160;
 
   const qtyBtns = document.querySelectorAll('.calc-qty-btn');
-  const includeShippingEl = document.getElementById('includeShipping');
   const subtotalEl = document.getElementById('priceSubtotal');
   const discountEl = document.getElementById('priceDiscount');
-  const shippingEl = document.getElementById('priceShipping');
   const totalEl = document.getElementById('priceTotal');
-  let currentQty = 1;
 
   function formatMXN(value) {
     const n = Math.round(value);
@@ -143,16 +147,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function setQty(qty) {
     const q = qty === 2 ? 2 : 1;
-    currentQty = q;
     const subtotal = PRICE_UNIT * q;
     const discount = q === 2 ? subtotal * DISCOUNT_2 : 0;
-    const shipping = includeShippingEl && includeShippingEl.checked ? SHIPPING_COST : 0;
-    const total = subtotal - discount + shipping;
+    const total = subtotal - discount;
 
     qtyBtns.forEach(btn => btn.classList.toggle('is-active', Number(btn.dataset.qty) === q));
     if (subtotalEl) subtotalEl.textContent = formatMXN(subtotal);
     if (discountEl) discountEl.textContent = formatMXN(discount);
-    if (shippingEl) shippingEl.textContent = formatMXN(shipping);
     if (totalEl) totalEl.textContent = formatMXN(total);
   }
 
@@ -160,9 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
     qtyBtns.forEach(btn => {
       btn.addEventListener('click', () => setQty(Number(btn.dataset.qty)));
     });
-    if (includeShippingEl) {
-      includeShippingEl.addEventListener('change', () => setQty(currentQty));
-    }
     setQty(1);
   }
 
@@ -501,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* =============================================
-     8. MODELOS DISPONIBLES DESDE JSON
+     8. MODELOS DISPONIBLES DESDE SUPABASE
   ============================================= */
   const galleryGrid = document.getElementById('galleryGrid');
   const galleryTabsWrap = document.getElementById('galleryTabs');
@@ -743,14 +741,42 @@ document.addEventListener('DOMContentLoaded', () => {
     galleryDots = Array.from(galleryDotsWrap.querySelectorAll('.dot'));
   }
 
+  async function loadGalleryModelsFromJson() {
+    const response = await fetch('models.json');
+    if (!response.ok) throw new Error('No se pudo cargar models.json');
+    return response.json();
+  }
+
+  async function loadGalleryModelsFromSupabase() {
+    if (!supabaseClient) {
+      throw new Error('Cliente de Supabase no disponible');
+    }
+
+    const { data, error } = await supabaseClient
+      .from('models')
+      .select('name,image,alt,description,video,type')
+      .order('id', { ascending: true });
+
+    if (error) throw error;
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new Error('La tabla models está vacía o RLS bloquea la lectura');
+    }
+    return data;
+  }
+
   async function loadGalleryModels() {
     if (!galleryGrid || !galleryDotsWrap) return;
 
     try {
-      const response = await fetch('models.json');
-      if (!response.ok) throw new Error('No se pudo cargar models.json');
+      let models;
 
-      const models = await response.json();
+      try {
+        models = await loadGalleryModelsFromSupabase();
+      } catch (supabaseError) {
+        console.warn('No se pudieron cargar modelos desde Supabase. Usando models.json:', supabaseError);
+        models = await loadGalleryModelsFromJson();
+      }
+
       if (!Array.isArray(models) || models.length === 0) return;
 
       galleryModels = models;
@@ -935,7 +961,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   `;
   document.head.appendChild(activeLinkStyle);
-
-  console.log('%c🐾 Huella Creativa – PetPop Online', 'color:#FF6B35;font-size:1.2rem;font-weight:bold;');
 
 });
