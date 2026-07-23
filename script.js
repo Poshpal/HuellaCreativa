@@ -413,6 +413,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const formSucc   = document.getElementById('formSuccess');
   const resetFormBtn = document.getElementById('resetFormBtn');
 
+  const petTypeSelect = document.getElementById('petType');
+  const petTypeOtherGroup = document.getElementById('petTypeOtherGroup');
+  const petTypeOtherInput = document.getElementById('petTypeOther');
+
+  function togglePetTypeOther() {
+    if (!petTypeSelect || !petTypeOtherGroup || !petTypeOtherInput) return;
+
+    const showOther = petTypeSelect.value === 'otro';
+    petTypeOtherGroup.hidden = !showOther;
+    petTypeOtherGroup.style.display = showOther ? '' : 'none';
+
+    if (showOther) {
+      petTypeOtherInput.setAttribute('required', '');
+    } else {
+      petTypeOtherInput.removeAttribute('required');
+      petTypeOtherInput.value = '';
+      clearError(petTypeOtherInput);
+    }
+  }
+
   function resetOrderForm() {
     if (!form) return;
 
@@ -421,6 +441,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const accept = document.getElementById('accept');
     if (accept) accept.style.outline = '';
+
+    togglePetTypeOther();
 
     form.style.display = '';
     if (formSucc) formSucc.classList.remove('visible');
@@ -434,6 +456,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (resetFormBtn) {
     resetFormBtn.addEventListener('click', resetOrderForm);
+  }
+
+  if (petTypeSelect) {
+    petTypeSelect.addEventListener('change', togglePetTypeOther);
+    togglePetTypeOther();
   }
 
   if (form) {
@@ -463,6 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const phone     = document.getElementById('phone').value.trim();
       const petName   = document.getElementById('petName').value.trim();
       const petType   = document.getElementById('petType').value;
+      const petTypeOther = document.getElementById('petTypeOther')?.value.trim() || '';
       const petBreed  = document.getElementById('petBreed').value.trim();
       const petAge    = document.getElementById('petAge').value.trim();
       const petNicknames = document.getElementById('petNicknames').value.trim();
@@ -470,8 +498,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const message   = document.getElementById('message').value.trim();
       const accept    = document.getElementById('accept').value.trim();
       const colorBox  = document.getElementById('colorBox').value;
+      const postalCode = document.getElementById('postalCode').value.trim();
 
       const petTypeLabels = { gato: '🐱 Gato', perro: '🐕 Perro', otro: '🐾 Otro' };
+      const petTypeText = petType === 'otro' && petTypeOther
+        ? `🐾 Otro: ${petTypeOther}`
+        : (petTypeLabels[petType] || petType);
 
       const waMsg = encodeURIComponent(
         `¡Hola Huella Creativa! 🐾 Quiero pedir un PetPop personalizado:\n\n` +
@@ -479,13 +511,14 @@ document.addEventListener('DOMContentLoaded', () => {
         `📱 Teléfono: ${phone}\n` +
         `--------------------------------\n` +
         `🐾 Mascota: ${petName}\n` +
-        `🐾 Tipo: ${petTypeLabels[petType] || petType}\n` +
+        `🐾 Tipo: ${petTypeText}\n` +
         (petBreed ? `🔖 Raza: ${petBreed}\n` : '') +
         (petAge   ? `📅 Edad: ${petAge}\n` : '') +
         (petNicknames ? `📝 Apodos: ${petNicknames}\n` : '') +
         (petActivity ? `🏃 Actividad favorita: ${petActivity}\n` : '') +
         `--------------------------------\n` +
         (colorBox ? `🎨 Color de caja: ${colorBox}\n` : '') +
+        (postalCode ? `🏢 Quiero que envíen mi PetPop a este código postal: ${postalCode}\n` : '') +
         (message  ? `💬 Mensaje/Datos extra: ${message}\n` : '') +
         `--------------------------------\n` +
         (accept ? `💰 Acepto dar $100 de anticipo para que agenden mi pedido` : '')
@@ -545,6 +578,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!petType.value) {
       showError(petType, 'Seleccioná el tipo de mascota.');
       valid = false;
+    }
+    if (petType.value === 'otro') {
+      const petTypeOther = document.getElementById('petTypeOther');
+      if (petTypeOther && !petTypeOther.value.trim()) {
+        showError(petTypeOther, 'Especificá el tipo de mascota.');
+        valid = false;
+      }
     }
     if (!petAge.value.trim()) {
       showError(petAge, 'La edad de tu mascota es requerida.');
