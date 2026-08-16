@@ -433,7 +433,7 @@
       </div>
       <div class="order-grid">
         <div class="order-form-wrap card-reveal">
-          <form class="order-form" id="orderForm" novalidate>
+          <form class="order-form" id="orderForm" action="#pedido" method="get" novalidate>
             <div class="form-row">
               <div class="form-group">
                 <label for="ownerName">Tu nombre *</label>
@@ -531,11 +531,14 @@
           </form>
           <div class="form-success" id="formSuccess">
             <div class="success-icon">🎉</div>
-            <h3>¡Pedido recibido!</h3>
-            <p>Nos contactaremos con vos a la brevedad para comenzar a crear el PetPop de tu mascota. ¡Gracias por elegirnos! 🐾</p>
+            <h3>¡Casi listo!</h3>
+            <p>Tu pedido se envía por WhatsApp. Si no se abrió automáticamente, toca el botón de abajo para enviarlo. 🐾</p>
+            <p class="form-whatsapp-hint" id="formWhatsappHint" hidden>WhatsApp no se pudo abrir solo. Toca el botón verde para enviar tu pedido.</p>
             <div class="form-success-actions">
-              <button type="button" class="btn btn-primary" id="resetFormBtn">🐾 Enviar otro pedido</button>
-              <a href="#inicio" class="btn btn-secondary">Volver al inicio</a>
+              <a href="https://wa.me/5219811683822" class="btn btn-whatsapp" id="formWhatsappLink" target="_blank" rel="noopener">
+                Enviar por WhatsApp
+              </a>
+              <button type="button" class="btn btn-secondary" id="resetFormBtn">🐾 Enviar otro pedido</button>
             </div>
           </div>
         </div>
