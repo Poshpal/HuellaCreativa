@@ -1782,6 +1782,11 @@ input, textarea, select { font-family: inherit; }
   margin-bottom: .5rem;
 }
 .form-success p { color: var(--gray); font-size: 1rem; }
+.form-whatsapp-hint {
+  margin-top: .75rem;
+  color: #c0392b;
+  font-weight: 700;
+}
 .form-success-actions {
   display: flex;
   flex-wrap: wrap;

@@ -9,10 +9,14 @@ const SUPABASE_URL = 'https://walpqiwxbawdhllizxtw.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_Z6dG8LOXQZMxjgydCxOgxg_AEbMmXqE';
 const CLOUDINARY_IMAGE_BASE = 'https://res.cloudinary.com/xyzma0pz/image/upload/';
 
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+let supabaseClient = null;
+try {
+  if (window.supabase && typeof window.supabase.createClient === 'function') {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+} catch (error) {
+  console.warn('Supabase no disponible. Se usarán los archivos JSON locales:', error);
+}
 
 /** Une el public_id de Cloudinary (sin extensión) con la URL base. */
 function getCloudinaryImageUrl(image) {
@@ -470,22 +474,19 @@ document.addEventListener('DOMContentLoaded', () => {
       field.addEventListener('change', () => clearError(field));
     });
 
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', (e) => {
       e.preventDefault();
-      
+
       if (!validateForm()) {
-        // Shake animation on invalid
         form.style.animation = 'none';
         void form.offsetWidth;
         form.style.animation = 'shake .4s ease';
         return;
       }
 
-      // 1. Mostrar estado de carga
       submitBtn.classList.add('loading');
       submitBtn.disabled = true;
 
-      // 2. Preparar mensaje de WhatsApp
       const ownerName = document.getElementById('ownerName').value.trim();
       const phone     = document.getElementById('phone').value.trim();
       const petName   = document.getElementById('petName').value.trim();
@@ -496,7 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const petNicknames = document.getElementById('petNicknames').value.trim();
       const petActivity = document.getElementById('petActivity').value.trim();
       const message   = document.getElementById('message').value.trim();
-      const accept    = document.getElementById('accept').value.trim();
+      const accept    = document.getElementById('accept').checked;
       const colorBox  = document.getElementById('colorBox').value;
       const postalCode = document.getElementById('postalCode').value.trim();
 
@@ -524,18 +525,28 @@ document.addEventListener('DOMContentLoaded', () => {
         (accept ? `💰 Acepto dar $100 de anticipo para que agenden mi pedido` : '')
       );
 
-      // Simular un pequeño retraso visual (opcional)
-      await new Promise(resolve => setTimeout(resolve, 1200));
-
       const whatsappUrl = `https://wa.me/5219811683822?text=${waMsg}`;
+      const waLink = document.getElementById('formWhatsappLink');
+      if (waLink) waLink.href = whatsappUrl;
 
-      // 4. Mostrar mensaje de éxito en la web
+      // Abrir WhatsApp en el mismo clic del usuario. Si se espera (setTimeout/await),
+      // el navegador bloquea la ventana y el pedido nunca llega.
+      let waWindow = null;
+      try {
+        waWindow = window.open(whatsappUrl, '_blank');
+        if (waWindow) waWindow.opener = null;
+      } catch (_) {
+        waWindow = null;
+      }
+
       submitBtn.classList.remove('loading');
       form.style.display = 'none';
       formSucc.classList.add('visible');
 
-      // Abrir WhatsApp solo en otra pestaña (sin redirigir la actual)
-      window.open(whatsappUrl, '_blank');
+      const waHint = document.getElementById('formWhatsappHint');
+      if (waHint) {
+        waHint.hidden = Boolean(waWindow);
+      }
     });
   }
 
