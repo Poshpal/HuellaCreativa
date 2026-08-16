@@ -936,6 +936,177 @@ document.addEventListener('DOMContentLoaded', () => {
   loadGalleryModels();
 
   /* =============================================
+     8.5. PETPOPS ENTREGADOS DESDE SUPABASE
+  ============================================= */
+  const petpopsGrid = document.getElementById('petpopsGrid');
+  const petpopsDotsWrap = document.getElementById('petpopsDots');
+  let petpopCards = [];
+  let petpopDots = [];
+  let currentPetpop = 0;
+  let petpopsAutoPlay;
+
+  function createPetpopCard(item, index) {
+    const card = document.createElement('article');
+    const delayClass = index > 0 && index <= 3 ? ` delay-${index}` : '';
+    card.className = `petpop-card card-reveal${delayClass}`;
+
+    const imageWrap = document.createElement('div');
+    imageWrap.className = 'petpop-img-wrap';
+
+    const image = document.createElement('img');
+    image.className = 'petpop-image';
+    image.src = item.image || '';
+    image.alt = item.alt || `PetPop de ${item.pet || 'mascota'}`;
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    imageWrap.appendChild(image);
+
+    const info = document.createElement('div');
+    info.className = 'petpop-info';
+
+    const name = document.createElement('h3');
+    name.className = 'petpop-name';
+    name.textContent = item.pet || 'PetPop';
+
+    const place = document.createElement('p');
+    place.className = 'petpop-place';
+    if (item.place) {
+      const icon = document.createElement('span');
+      icon.className = 'petpop-place-icon';
+      icon.setAttribute('aria-hidden', 'true');
+      icon.textContent = '📍';
+      const placeText = document.createElement('span');
+      placeText.textContent = item.place;
+      place.append(icon, placeText);
+    }
+
+    info.appendChild(name);
+    if (item.place) info.appendChild(place);
+    card.append(imageWrap, info);
+    return card;
+  }
+
+  function createPetpopDot(index) {
+    const dot = document.createElement('button');
+    dot.className = `dot${index === 0 ? ' active' : ''}`;
+    dot.type = 'button';
+    dot.dataset.index = String(index);
+    dot.setAttribute('aria-label', `Ver PetPop ${index + 1}`);
+    return dot;
+  }
+
+  function goToPetpop(index) {
+    if (!petpopsGrid || !petpopCards || petpopCards.length === 0) return;
+
+    currentPetpop = index;
+    const firstCard = petpopCards[0];
+    if (!firstCard) return;
+
+    const cardWidth = firstCard.offsetWidth + 24;
+    petpopsGrid.scrollTo({ left: cardWidth * index, behavior: 'smooth' });
+    petpopDots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+  }
+
+  function bindPetpopDots() {
+    petpopDots.forEach((dot, index) => dot.addEventListener('click', () => {
+      clearInterval(petpopsAutoPlay);
+      goToPetpop(index);
+      startPetpopsAutoPlay();
+    }));
+  }
+
+  function startPetpopsAutoPlay() {
+    if (!petpopsGrid || !petpopCards || petpopCards.length === 0) return;
+    clearInterval(petpopsAutoPlay);
+    petpopsAutoPlay = setInterval(() => {
+      goToPetpop((currentPetpop + 1) % petpopCards.length);
+    }, 4500);
+  }
+
+  function renderPetpops(items) {
+    if (!petpopsGrid || !petpopsDotsWrap) return;
+
+    petpopsGrid.innerHTML = '';
+    petpopsDotsWrap.innerHTML = '';
+    items.forEach((item, index) => {
+      const card = createPetpopCard(item, index);
+      petpopsGrid.appendChild(card);
+      petpopsDotsWrap.appendChild(createPetpopDot(index));
+      revealObserver.observe(card);
+    });
+
+    petpopCards = Array.from(petpopsGrid.querySelectorAll('.petpop-card'));
+    petpopDots = Array.from(petpopsDotsWrap.querySelectorAll('.dot'));
+  }
+
+  async function loadPetpopsFromJson() {
+    const response = await fetch('petpops.json');
+    if (!response.ok) throw new Error('No se pudo cargar petpops.json');
+    return response.json();
+  }
+
+  async function loadPetpopsFromSupabase() {
+    if (!supabaseClient) {
+      throw new Error('Cliente de Supabase no disponible');
+    }
+
+    const { data, error } = await supabaseClient
+      .from('petpops')
+      .select('pet,place,image,alt')
+      .order('id', { ascending: false });
+
+    if (error) throw error;
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new Error('La tabla petpops está vacía o RLS bloquea la lectura');
+    }
+    return data;
+  }
+
+  async function loadPetpops() {
+    if (!petpopsGrid || !petpopsDotsWrap) return;
+
+    try {
+      let items;
+
+      try {
+        items = await loadPetpopsFromSupabase();
+      } catch (supabaseError) {
+        console.warn('No se pudieron cargar PetPops desde Supabase. Usando petpops.json:', supabaseError);
+        items = await loadPetpopsFromJson();
+      }
+
+      if (!Array.isArray(items) || items.length === 0) return;
+
+      const normalized = items.map((item) => ({
+        ...item,
+        image: getCloudinaryImageUrl(item.image),
+      }));
+
+      renderPetpops(normalized);
+      bindPetpopDots();
+      goToPetpop(0);
+      startPetpopsAutoPlay();
+    } catch (error) {
+      console.error('Error cargando PetPops entregados:', error);
+      petpopsGrid.innerHTML = '<p class="section-subtitle">Pronto verás aquí todos nuestros PetPops entregados. 🐾</p>';
+    }
+  }
+
+  if (petpopsGrid) {
+    petpopsGrid.addEventListener('scroll', () => {
+      if (!petpopCards || petpopCards.length === 0) return;
+      const firstCard = petpopCards[0];
+      if (!firstCard) return;
+      const cardWidth = firstCard.offsetWidth + 24;
+      const index = Math.max(0, Math.min(petpopCards.length - 1, Math.round(petpopsGrid.scrollLeft / cardWidth)));
+      petpopDots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+      currentPetpop = index;
+    }, { passive: true });
+  }
+
+  loadPetpops();
+
+  /* =============================================
      9. PRODUCT CARD HOVER SPARKLE
   ============================================= */
   document.querySelectorAll('.product-card').forEach(card => {
