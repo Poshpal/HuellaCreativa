@@ -748,15 +748,22 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!galleryVideoModal || !galleryVideoEl) return;
     galleryVideoEl.pause();
     galleryVideoEl.removeAttribute("src");
+    galleryVideoEl.muted = true;
+    galleryVideoEl.defaultMuted = true;
+    galleryVideoEl.setAttribute("muted", "");
+    galleryVideoEl.loop = true;
+    galleryVideoEl.controls = false;
     galleryVideoEl.load();
     galleryVideoModal.classList.remove("open");
     galleryVideoModal.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
   }
 
-  function openGalleryVideo(src) {
+  function openGalleryVideo(src, options = {}) {
     const url = src && typeof src === "string" ? src.trim() : "";
     if (!url || !galleryVideoModal || !galleryVideoEl) return;
+
+    const withAudio = Boolean(options.withAudio);
 
     // Si el archivo no se puede cargar (404 / ruta incorrecta), cerramos el modal.
     const onError = () => {
@@ -765,6 +772,16 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     galleryVideoEl.addEventListener("error", onError);
 
+    galleryVideoEl.muted = !withAudio;
+    galleryVideoEl.defaultMuted = !withAudio;
+    if (withAudio) {
+      galleryVideoEl.removeAttribute("muted");
+    } else {
+      galleryVideoEl.setAttribute("muted", "");
+    }
+    galleryVideoEl.loop = !withAudio;
+    galleryVideoEl.controls = withAudio;
+    galleryVideoEl.volume = 1;
     galleryVideoEl.src = url;
     galleryVideoModal.classList.add("open");
     galleryVideoModal.setAttribute("aria-hidden", "false");
@@ -1272,6 +1289,168 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   loadPetpops();
+
+  /* =============================================
+     8.6. EDICIONES ESPECIALES DESDE SUPABASE
+  ============================================= */
+  const editionsGrid = document.getElementById("editionsGrid");
+  const editionsSection = document.getElementById("ediciones");
+
+  function createEditionCard(item, index) {
+    const card = document.createElement("article");
+    const delayClass = index > 0 && index <= 3 ? ` delay-${index}` : "";
+    const theme = item.theme ? String(item.theme).trim() : "";
+    card.className = `edition-card card-reveal${delayClass}`;
+    if (theme) card.dataset.theme = theme;
+
+    const slug = item.slug ? String(item.slug).trim() : "";
+    const videoSrc = slug ? `videos/${slug}.mp4` : "";
+
+    const imageWrap = document.createElement("div");
+    imageWrap.className = `edition-img-wrap${videoSrc ? " has-video" : ""}`;
+
+    const image = document.createElement("img");
+    image.className = "edition-image";
+    image.src = item.image || "";
+    image.alt = item.alt || item.title || "Edición especial PetPop";
+    image.loading = "lazy";
+    image.decoding = "async";
+    imageWrap.appendChild(image);
+
+    if (item.badge) {
+      const badge = document.createElement("span");
+      badge.className = "edition-badge";
+      badge.textContent = item.badge;
+      imageWrap.appendChild(badge);
+    }
+
+    if (videoSrc) {
+      imageWrap.tabIndex = 0;
+      imageWrap.setAttribute("role", "button");
+      imageWrap.setAttribute(
+        "aria-label",
+        `Ver video de ${item.title || "edición especial"}`,
+      );
+      imageWrap.title = "Click para ver el video";
+
+      const hint = document.createElement("span");
+      hint.className = "gallery-video-hint";
+      hint.setAttribute("aria-hidden", "true");
+      hint.textContent = "Click para ver video ▶";
+      imageWrap.appendChild(hint);
+
+      const playEditionVideo = () =>
+        openGalleryVideo(videoSrc, { withAudio: true });
+      imageWrap.addEventListener("click", playEditionVideo);
+      imageWrap.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter" && e.key !== " ") return;
+        e.preventDefault();
+        playEditionVideo();
+      });
+    }
+
+    const info = document.createElement("div");
+    info.className = "edition-info";
+
+    const title = document.createElement("h3");
+    title.className = "edition-title";
+    title.textContent = item.title || "Edición especial";
+    info.appendChild(title);
+
+    if (item.year) {
+      const meta = document.createElement("p");
+      meta.className = "edition-meta";
+      meta.textContent = `Edición ${item.year}`;
+      info.appendChild(meta);
+    }
+
+    if (item.description) {
+      const description = document.createElement("p");
+      description.className = "edition-description";
+      description.textContent = item.description;
+      info.appendChild(description);
+    }
+
+    card.append(imageWrap, info);
+    return card;
+  }
+
+  function renderEditions(items) {
+    if (!editionsGrid) return;
+
+    editionsGrid.innerHTML = "";
+    items.forEach((item, index) => {
+      const card = createEditionCard(item, index);
+      editionsGrid.appendChild(card);
+      revealObserver.observe(card);
+    });
+  }
+
+  async function loadEditionsFromJson() {
+    const response = await fetch("special-editions.json");
+    if (!response.ok)
+      throw new Error("No se pudo cargar special-editions.json");
+    return response.json();
+  }
+
+  async function loadEditionsFromSupabase() {
+    if (!supabaseClient) {
+      throw new Error("Cliente de Supabase no disponible");
+    }
+
+    const { data, error } = await supabaseClient
+      .from("special_editions")
+      .select(
+        "title,slug,theme,description,image,alt,badge,year,is_available,is_featured,sort_order",
+      )
+      .eq("is_available", true)
+      .order("sort_order", { ascending: true })
+      .order("id", { ascending: false });
+
+    if (error) throw error;
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new Error(
+        "La tabla special_editions está vacía o RLS bloquea la lectura",
+      );
+    }
+    return data;
+  }
+
+  async function loadSpecialEditions() {
+    if (!editionsGrid) return;
+
+    try {
+      let items;
+
+      try {
+        items = await loadEditionsFromSupabase();
+      } catch (supabaseError) {
+        console.warn(
+          "No se pudieron cargar ediciones desde Supabase. Usando special-editions.json:",
+          supabaseError,
+        );
+        items = await loadEditionsFromJson();
+      }
+
+      if (!Array.isArray(items) || items.length === 0) {
+        if (editionsSection) editionsSection.hidden = true;
+        return;
+      }
+
+      const normalized = items.map((item) => ({
+        ...item,
+        image: getCloudinaryImageUrl(item.image),
+      }));
+
+      renderEditions(normalized);
+    } catch (error) {
+      console.error("Error cargando ediciones especiales:", error);
+      editionsGrid.innerHTML =
+        '<p class="section-subtitle">Pronto verás aquí nuestras cajas de edición especial. ✨</p>';
+    }
+  }
+
+  loadSpecialEditions();
 
   /* =============================================
      9. PRODUCT CARD HOVER SPARKLE

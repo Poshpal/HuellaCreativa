@@ -1,0 +1,28 @@
+[
+  {
+    "title": "Edición Día de Muertos",
+    "slug": "dia-de-muertos-2026",
+    "theme": "dia-de-muertos",
+    "description": "Caja especial con altar, cempasúchil y detalles en foil dorado. Una edición limitada para honrar a tu peludo.",
+    "image": "caja-muertos-2026",
+    "alt": "Caja PetPop edición Día de Muertos",
+    "badge": "Limitada",
+    "year": 2026,
+    "is_available": true,
+    "is_featured": true,
+    "sort_order": 1
+  },
+  {
+    "title": "Edición Halloween",
+    "slug": "halloween-2026",
+    "theme": "halloween",
+    "description": "Caja especial con calabazas, murciélagos y detalles en naranja y negro. Una edición limitada de temporada.",
+    "image": "caja-halloween-2026",
+    "alt": "Caja PetPop edición Halloween",
+    "badge": "Temporada",
+    "year": 2026,
+    "is_available": true,
+    "is_featured": true,
+    "sort_order": 2
+  }
+]
