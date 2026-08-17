@@ -1730,7 +1730,7 @@ select {
 }
 
 .product-detail-img {
-  width: min(100%, 460px);
+  width: min(100%, 600px);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
