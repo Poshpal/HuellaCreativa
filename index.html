@@ -331,15 +331,50 @@
         </ul>
       </div>
 
+      <div class="price-card card-reveal">
+        <div class="price-card-top">
+          <h3 class="price-title">PetPop Edición Especial</h3>
+          <p class="price-desc">Figura de yeso estilo Funko Pop con la imagen de tu mascota y pintado a mano en una edición de temporada.</p>
+        </div>
+
+        <div class="price-amount">
+          <span class="price-currency">$</span>
+          <span class="price-value">450</span>
+          <span class="price-unit">MXN</span>
+        </div>
+
+        <ul class="price-features">
+          <li>🐾 Edición de temporada</li>
+          <li>📦 Caja coleccionable con temática de temporada</li>
+        </ul>
+      </div>
+
       <div class="price-calc card-reveal delay-1">
         <h3 class="calc-title">Simulador de precios</h3>
 
+        <p class="calc-label">Tipo de PetPop</p>
+        <div class="calc-qty" role="group" aria-label="Tipo de PetPop">
+          <button type="button" class="calc-qty-btn is-active" data-price-type="regular">
+            Personalizado
+            <span class="calc-price-pill">$400</span>
+          </button>
+          <button type="button" class="calc-qty-btn" data-price-type="special">
+            Edición de temporada
+            <span class="calc-price-pill">$450</span>
+          </button>
+        </div>
+
+        <p class="calc-label">Cantidad</p>
         <div class="calc-qty" role="group" aria-label="Cantidad de PetPop">
           <button type="button" class="calc-qty-btn is-active" data-qty="1">1 PetPop</button>
           <button type="button" class="calc-qty-btn" data-qty="2">2 PetPops <span class="calc-discount-pill">-10%</span></button>
         </div>
 
         <div class="calc-summary" aria-live="polite">
+          <div class="calc-row">
+            <span id="priceTypeLabel">Personalizado</span>
+            <strong id="priceUnit">$400 MXN c/u</strong>
+          </div>
           <div class="calc-row">
             <span>Subtotal</span>
             <strong id="priceSubtotal">$400 MXN</strong>

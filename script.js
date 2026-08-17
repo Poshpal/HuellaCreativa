@@ -162,38 +162,68 @@ document.addEventListener("DOMContentLoaded", () => {
   /* =============================================
      4.5. PRICES CALCULATOR
   ============================================= */
-  const PRICE_UNIT = 400;
+  const PRICE_REGULAR = 400;
+  const PRICE_SPECIAL = 450;
   const DISCOUNT_2 = 0.1;
 
-  const qtyBtns = document.querySelectorAll(".calc-qty-btn");
+  const typeBtns = document.querySelectorAll(".calc-qty-btn[data-price-type]");
+  const qtyBtns = document.querySelectorAll(".calc-qty-btn[data-qty]");
+  const typeLabelEl = document.getElementById("priceTypeLabel");
+  const unitEl = document.getElementById("priceUnit");
   const subtotalEl = document.getElementById("priceSubtotal");
   const discountEl = document.getElementById("priceDiscount");
   const totalEl = document.getElementById("priceTotal");
+
+  let currentPriceType = "regular";
+  let currentQty = 1;
 
   function formatMXN(value) {
     const n = Math.round(value);
     return `$${n.toLocaleString("es-MX")} MXN`;
   }
 
-  function setQty(qty) {
-    const q = qty === 2 ? 2 : 1;
-    const subtotal = PRICE_UNIT * q;
-    const discount = q === 2 ? subtotal * DISCOUNT_2 : 0;
+  function updatePriceCalc() {
+    const isSpecial = currentPriceType === "special";
+    const unit = isSpecial ? PRICE_SPECIAL : PRICE_REGULAR;
+    const qty = currentQty === 2 ? 2 : 1;
+    const subtotal = unit * qty;
+    const discount = qty === 2 ? subtotal * DISCOUNT_2 : 0;
     const total = subtotal - discount;
 
-    qtyBtns.forEach((btn) =>
-      btn.classList.toggle("is-active", Number(btn.dataset.qty) === q),
+    typeBtns.forEach((btn) =>
+      btn.classList.toggle("is-active", btn.dataset.priceType === currentPriceType),
     );
+    qtyBtns.forEach((btn) =>
+      btn.classList.toggle("is-active", Number(btn.dataset.qty) === qty),
+    );
+
+    if (typeLabelEl) {
+      typeLabelEl.textContent = isSpecial
+        ? "Edición de temporada"
+        : "Personalizado";
+    }
+    if (unitEl) unitEl.textContent = `${formatMXN(unit)} c/u`;
     if (subtotalEl) subtotalEl.textContent = formatMXN(subtotal);
     if (discountEl) discountEl.textContent = formatMXN(discount);
     if (totalEl) totalEl.textContent = formatMXN(total);
   }
 
-  if (qtyBtns.length) {
-    qtyBtns.forEach((btn) => {
-      btn.addEventListener("click", () => setQty(Number(btn.dataset.qty)));
+  typeBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      currentPriceType = btn.dataset.priceType === "special" ? "special" : "regular";
+      updatePriceCalc();
     });
-    setQty(1);
+  });
+
+  qtyBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      currentQty = Number(btn.dataset.qty) === 2 ? 2 : 1;
+      updatePriceCalc();
+    });
+  });
+
+  if (typeBtns.length || qtyBtns.length) {
+    updatePriceCalc();
   }
 
   /* =============================================

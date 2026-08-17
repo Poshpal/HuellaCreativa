@@ -2101,6 +2101,10 @@ input[type="number"] {
   padding: 2rem;
 }
 
+.price-calc {
+  grid-column: 1 / -1;
+}
+
 .shipping-card {
   grid-column: 1 / -1;
   display: flex;
@@ -2204,6 +2208,15 @@ input[type="number"] {
   margin-bottom: 1rem;
 }
 
+.calc-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gray);
+}
+
 .calc-qty {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2218,11 +2231,25 @@ input[type="number"] {
   padding: 0.9rem 0.9rem;
   font-weight: 900;
   color: var(--dark);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
   transition:
     transform var(--transition),
     box-shadow var(--transition),
     border-color var(--transition),
     background var(--transition);
+}
+
+.calc-price-pill {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.78rem;
+  border-radius: 999px;
+  background: rgba(78, 205, 196, 0.18);
+  color: var(--dark);
 }
 .calc-qty-btn:hover {
   transform: translateY(-2px);
