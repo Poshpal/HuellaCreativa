@@ -2943,6 +2943,11 @@ input[type="number"] {
     grid-template-columns: 1fr;
     max-width: 420px;
   }
+  .edition-img-wrap.has-video .gallery-video-hint,
+  .edition-img-wrap.has-video:hover .gallery-video-hint,
+  .edition-img-wrap.has-video:focus .gallery-video-hint {
+    display: none;
+  }
   .testimonial-card {
     flex: 0 0 300px;
   }
@@ -3034,7 +3039,7 @@ input[type="number"] {
     transform: translate(-50%, -52%);
   }
   .edition-img-wrap.has-video .gallery-video-hint {
-    opacity: 0.9;
+    display: none;
   }
 
   /* Ajustes extra para navbar en pantallas muy pequeñas */
