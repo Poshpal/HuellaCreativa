@@ -159,72 +159,72 @@ document.addEventListener("DOMContentLoaded", () => {
 
   revealEls.forEach((el) => revealObserver.observe(el));
 
-  /* =============================================
-     4.5. PRICES CALCULATOR
-  ============================================= */
-  const PRICE_REGULAR = 400;
-  const PRICE_SPECIAL = 450;
-  const DISCOUNT_2 = 0.1;
+  // /* =============================================
+  //    4.5. PRICES CALCULATOR
+  // ============================================= */
+  // const PRICE_REGULAR = 400;
+  // const PRICE_SPECIAL = 450;
+  // const DISCOUNT_2 = 0.1;
 
-  const typeBtns = document.querySelectorAll(".calc-qty-btn[data-price-type]");
-  const qtyBtns = document.querySelectorAll(".calc-qty-btn[data-qty]");
-  const typeLabelEl = document.getElementById("priceTypeLabel");
-  const unitEl = document.getElementById("priceUnit");
-  const subtotalEl = document.getElementById("priceSubtotal");
-  const discountEl = document.getElementById("priceDiscount");
-  const totalEl = document.getElementById("priceTotal");
+  // const typeBtns = document.querySelectorAll(".calc-qty-btn[data-price-type]");
+  // const qtyBtns = document.querySelectorAll(".calc-qty-btn[data-qty]");
+  // const typeLabelEl = document.getElementById("priceTypeLabel");
+  // const unitEl = document.getElementById("priceUnit");
+  // const subtotalEl = document.getElementById("priceSubtotal");
+  // const discountEl = document.getElementById("priceDiscount");
+  // const totalEl = document.getElementById("priceTotal");
 
-  let currentPriceType = "regular";
-  let currentQty = 1;
+  // let currentPriceType = "regular";
+  // let currentQty = 1;
 
-  function formatMXN(value) {
-    const n = Math.round(value);
-    return `$${n.toLocaleString("es-MX")} MXN`;
-  }
+  // function formatMXN(value) {
+  //   const n = Math.round(value);
+  //   return `$${n.toLocaleString("es-MX")} MXN`;
+  // }
 
-  function updatePriceCalc() {
-    const isSpecial = currentPriceType === "special";
-    const unit = isSpecial ? PRICE_SPECIAL : PRICE_REGULAR;
-    const qty = currentQty === 2 ? 2 : 1;
-    const subtotal = unit * qty;
-    const discount = qty === 2 ? subtotal * DISCOUNT_2 : 0;
-    const total = subtotal - discount;
+  // function updatePriceCalc() {
+  //   const isSpecial = currentPriceType === "special";
+  //   const unit = isSpecial ? PRICE_SPECIAL : PRICE_REGULAR;
+  //   const qty = currentQty === 2 ? 2 : 1;
+  //   const subtotal = unit * qty;
+  //   const discount = qty === 2 ? subtotal * DISCOUNT_2 : 0;
+  //   const total = subtotal - discount;
 
-    typeBtns.forEach((btn) =>
-      btn.classList.toggle("is-active", btn.dataset.priceType === currentPriceType),
-    );
-    qtyBtns.forEach((btn) =>
-      btn.classList.toggle("is-active", Number(btn.dataset.qty) === qty),
-    );
+  //   typeBtns.forEach((btn) =>
+  //     btn.classList.toggle("is-active", btn.dataset.priceType === currentPriceType),
+  //   );
+  //   qtyBtns.forEach((btn) =>
+  //     btn.classList.toggle("is-active", Number(btn.dataset.qty) === qty),
+  //   );
 
-    if (typeLabelEl) {
-      typeLabelEl.textContent = isSpecial
-        ? "Edición de temporada"
-        : "Personalizado";
-    }
-    if (unitEl) unitEl.textContent = `${formatMXN(unit)} c/u`;
-    if (subtotalEl) subtotalEl.textContent = formatMXN(subtotal);
-    if (discountEl) discountEl.textContent = formatMXN(discount);
-    if (totalEl) totalEl.textContent = formatMXN(total);
-  }
+  //   if (typeLabelEl) {
+  //     typeLabelEl.textContent = isSpecial
+  //       ? "Edición de temporada"
+  //       : "Personalizado";
+  //   }
+  //   if (unitEl) unitEl.textContent = `${formatMXN(unit)} c/u`;
+  //   if (subtotalEl) subtotalEl.textContent = formatMXN(subtotal);
+  //   if (discountEl) discountEl.textContent = formatMXN(discount);
+  //   if (totalEl) totalEl.textContent = formatMXN(total);
+  // }
 
-  typeBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      currentPriceType = btn.dataset.priceType === "special" ? "special" : "regular";
-      updatePriceCalc();
-    });
-  });
+  // typeBtns.forEach((btn) => {
+  //   btn.addEventListener("click", () => {
+  //     currentPriceType = btn.dataset.priceType === "special" ? "special" : "regular";
+  //     updatePriceCalc();
+  //   });
+  // });
 
-  qtyBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      currentQty = Number(btn.dataset.qty) === 2 ? 2 : 1;
-      updatePriceCalc();
-    });
-  });
+  // qtyBtns.forEach((btn) => {
+  //   btn.addEventListener("click", () => {
+  //     currentQty = Number(btn.dataset.qty) === 2 ? 2 : 1;
+  //     updatePriceCalc();
+  //   });
+  // });
 
-  if (typeBtns.length || qtyBtns.length) {
-    updatePriceCalc();
-  }
+  // if (typeBtns.length || qtyBtns.length) {
+  //   updatePriceCalc();
+  // }
 
   /* =============================================
      5. FAQ ACCORDION
