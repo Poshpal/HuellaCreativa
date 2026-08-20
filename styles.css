@@ -1800,7 +1800,7 @@ select {
 
 .testimonials-track {
   display: flex;
-  align-items: stretch;
+  align-items: flex-start;
   gap: 1.5rem;
   overflow-x: auto;
   scroll-snap-type: x mandatory;

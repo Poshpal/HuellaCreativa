@@ -320,16 +320,7 @@ document.addEventListener("DOMContentLoaded", () => {
       event.preventDefault();
       event.stopPropagation();
       const willExpand = !card.classList.contains("is-expanded");
-
-      cards.forEach((other) => {
-        if (other === card) return;
-        other.classList.remove("is-expanded");
-        const otherToggle = other.querySelector(".test-message-toggle");
-        if (!otherToggle || otherToggle.classList.contains("is-hidden")) return;
-        otherToggle.textContent = "Ver más";
-        otherToggle.setAttribute("aria-expanded", "false");
-      });
-
+      collapseExpandedTestimonials(card);
       card.classList.toggle("is-expanded", willExpand);
       toggle.textContent = willExpand ? "Ver menos" : "Ver más";
       toggle.setAttribute("aria-expanded", String(willExpand));
@@ -395,8 +386,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function collapseExpandedTestimonials(exceptCard) {
+    cards.forEach((card) => {
+      if (card === exceptCard || !card.classList.contains("is-expanded")) return;
+      card.classList.remove("is-expanded");
+      const toggle = card.querySelector(".test-message-toggle");
+      if (!toggle || toggle.classList.contains("is-hidden")) return;
+      toggle.textContent = "Ver más";
+      toggle.setAttribute("aria-expanded", "false");
+    });
+  }
+
   function goTo(index) {
     if (!track || !cards || cards.length === 0) return;
+    if (index !== current) collapseExpandedTestimonials();
     current = index;
     const firstCard = cards[0];
     if (!firstCard) return;
@@ -426,6 +429,7 @@ document.addEventListener("DOMContentLoaded", () => {
           0,
           Math.min(cards.length - 1, Math.round(track.scrollLeft / cardWidth)),
         );
+        if (idx !== current) collapseExpandedTestimonials();
         dots.forEach((d, i) => d.classList.toggle("active", i === idx));
         current = idx;
       },
