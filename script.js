@@ -304,9 +304,38 @@ document.addEventListener("DOMContentLoaded", () => {
     quote.setAttribute("aria-hidden", "true");
     quote.textContent = "“";
 
+    const messageWrap = document.createElement("div");
+    messageWrap.className = "test-message-wrap";
+
     const message = document.createElement("p");
     message.className = "test-message";
     message.textContent = testimonial.message || "";
+
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "test-message-toggle is-hidden";
+    toggle.textContent = "Ver más";
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const willExpand = !card.classList.contains("is-expanded");
+
+      cards.forEach((other) => {
+        if (other === card) return;
+        other.classList.remove("is-expanded");
+        const otherToggle = other.querySelector(".test-message-toggle");
+        if (!otherToggle || otherToggle.classList.contains("is-hidden")) return;
+        otherToggle.textContent = "Ver más";
+        otherToggle.setAttribute("aria-expanded", "false");
+      });
+
+      card.classList.toggle("is-expanded", willExpand);
+      toggle.textContent = willExpand ? "Ver menos" : "Ver más";
+      toggle.setAttribute("aria-expanded", String(willExpand));
+    });
+
+    messageWrap.append(message, toggle);
 
     const pet = document.createElement("div");
     pet.className = "test-author";
@@ -324,7 +353,7 @@ document.addEventListener("DOMContentLoaded", () => {
     authorCopy.append(petName, place);
     pet.append(avatar, authorCopy);
 
-    body.append(top, quote, message, pet);
+    body.append(top, quote, messageWrap, pet);
     card.appendChild(body);
 
     return card;
@@ -352,6 +381,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     cards = Array.from(track.querySelectorAll(".testimonial-card"));
     dots = Array.from(dotsWrap.querySelectorAll(".dot"));
+    requestAnimationFrame(setupTestimonialOverflow);
+  }
+
+  function setupTestimonialOverflow() {
+    cards.forEach((card) => {
+      if (card.classList.contains("is-expanded")) return;
+      const message = card.querySelector(".test-message");
+      const toggle = card.querySelector(".test-message-toggle");
+      if (!message || !toggle) return;
+      const overflows = message.scrollHeight > message.clientHeight + 1;
+      toggle.classList.toggle("is-hidden", !overflows);
+    });
   }
 
   function goTo(index) {
@@ -390,6 +431,11 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       { passive: true },
     );
+  }
+
+  window.addEventListener("resize", setupTestimonialOverflow);
+  if (document.fonts?.ready) {
+    document.fonts.ready.then(setupTestimonialOverflow);
   }
 
   async function loadTestimonialsFromJson() {

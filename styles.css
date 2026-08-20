@@ -579,9 +579,19 @@ select {
 }
 .hero-ctas {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.85rem;
+  margin-bottom: 2.5rem;
+}
+.hero-ctas-row {
+  display: flex;
   gap: 1rem;
   flex-wrap: wrap;
-  margin-bottom: 2.5rem;
+}
+.hero-review-btn {
+  margin-top: 0;
+  display: inline-flex;
 }
 
 .hero-stats {
@@ -1790,6 +1800,7 @@ select {
 
 .testimonials-track {
   display: flex;
+  align-items: stretch;
   gap: 1.5rem;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
@@ -1803,6 +1814,8 @@ select {
 
 .testimonial-card {
   flex: 0 0 340px;
+  display: flex;
+  flex-direction: column;
   scroll-snap-align: start;
   background: rgba(255, 255, 255, 0.94);
   border: 1.5px solid rgba(255, 255, 255, 0.55);
@@ -1885,6 +1898,9 @@ select {
 .test-card-body {
   padding: 1.25rem 1rem 1rem;
   position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 .test-card-top {
   display: flex;
@@ -1917,18 +1933,61 @@ select {
   color: rgba(255, 107, 53, 0.12);
   pointer-events: none;
 }
+.test-message-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.25rem;
+}
 .testimonial-card .test-message {
   font-size: 0.95rem;
   color: var(--dark-2);
   line-height: 1.7;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.35rem;
   position: relative;
   z-index: 1;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
+  min-height: calc(1.7em * 4);
+  max-height: calc(1.7em * 4);
+}
+.testimonial-card.is-expanded .test-message {
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  max-height: none;
+  overflow: visible;
+}
+.test-message-toggle {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--primary);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 800;
+  line-height: 1.4;
+  min-height: 1.4em;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+}
+.test-message-toggle:hover {
+  text-decoration: underline;
+}
+.test-message-toggle.is-hidden {
+  visibility: hidden;
+  pointer-events: none;
 }
 .test-author {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  margin-top: auto;
   padding-top: 1rem;
   border-top: 1px solid rgba(45, 45, 45, 0.08);
 }
@@ -2880,6 +2939,9 @@ input[type="number"] {
     gap: 2rem;
   }
   .hero-ctas {
+    align-items: center;
+  }
+  .hero-ctas-row {
     justify-content: center;
   }
   .hero-stats {
