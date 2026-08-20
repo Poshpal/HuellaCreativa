@@ -250,7 +250,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let dots = [];
   let cards = [];
   let current = 0;
-  let autoPlay;
 
   function getTestimonialEmoji(pet) {
     const value = String(pet || "");
@@ -368,19 +367,9 @@ document.addEventListener("DOMContentLoaded", () => {
   function bindTestimonialDots() {
     dots.forEach((dot, i) =>
       dot.addEventListener("click", () => {
-        clearInterval(autoPlay);
         goTo(i);
-        startAutoPlay();
       }),
     );
-  }
-
-  function startAutoPlay() {
-    if (!track || !cards || cards.length === 0) return;
-    clearInterval(autoPlay);
-    autoPlay = setInterval(() => {
-      goTo((current + 1) % cards.length);
-    }, 4500);
   }
 
   // Sync dots on manual scroll
@@ -455,7 +444,6 @@ document.addEventListener("DOMContentLoaded", () => {
       renderTestimonials(normalized);
       bindTestimonialDots();
       goTo(0);
-      startAutoPlay();
     } catch (error) {
       console.error("Error cargando testimonios:", error);
       track.innerHTML =
