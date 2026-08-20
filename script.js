@@ -9,6 +9,8 @@ const SUPABASE_URL = "https://walpqiwxbawdhllizxtw.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_Z6dG8LOXQZMxjgydCxOgxg_AEbMmXqE";
 const CLOUDINARY_IMAGE_BASE =
   "https://res.cloudinary.com/xyzma0pz/image/upload/";
+const CLOUDINARY_VIDEO_BASE =
+  "https://res.cloudinary.com/xyzma0pz/video/upload/";
 
 let supabaseClient = null;
 try {
@@ -25,18 +27,78 @@ try {
   );
 }
 
-/** Une el public_id de Cloudinary (sin extensión) con la URL base. */
-function getCloudinaryImageUrl(image) {
+const CLOUDINARY_UPLOAD_PATH = "/image/upload/";
+
+function getCloudinaryTransform(width) {
+  return `f_auto,q_auto,c_limit,w_${width}`;
+}
+
+/** Une el public_id de Cloudinary con transformación de formato, calidad y ancho. */
+function getCloudinaryImageUrl(image, width = 680) {
   if (!image) return "";
   const value = String(image).trim();
-  if (/^https?:\/\//i.test(value)) return value;
+  const transform = getCloudinaryTransform(width);
+
+  if (/^https?:\/\//i.test(value)) {
+    const uploadIndex = value.indexOf(CLOUDINARY_UPLOAD_PATH);
+    if (uploadIndex === -1) return value;
+
+    const prefix = value.slice(0, uploadIndex + CLOUDINARY_UPLOAD_PATH.length);
+    const rest = value
+      .slice(uploadIndex + CLOUDINARY_UPLOAD_PATH.length)
+      .replace(/^f_auto,q_auto,c_limit,w_\d+\//, "");
+    return `${prefix}${transform}/${rest}`;
+  }
 
   // De "images/perrito4.png" → "perrito4"
   const fileName = value.split("/").pop();
   const publicId = fileName.replace(/\.(png|jpe?g|webp|gif)$/i, "");
-  console.log(`${CLOUDINARY_IMAGE_BASE}${publicId}`);
-  return `${CLOUDINARY_IMAGE_BASE}${publicId}`;
+  return `${CLOUDINARY_IMAGE_BASE}${transform}/${publicId}`;
 }
+
+/** Une el slug/public_id de Cloudinary con transformación de video. */
+function getCloudinaryVideoUrl(video, width = 720) {
+  if (!video) return "";
+  const value = String(video).trim();
+  const transform = `f_auto,q_auto,c_limit,w_${width}`;
+  const uploadPath = "/video/upload/";
+
+  if (/^https?:\/\//i.test(value)) {
+    const uploadIndex = value.indexOf(uploadPath);
+    if (uploadIndex === -1) return value;
+
+    const prefix = value.slice(0, uploadIndex + uploadPath.length);
+    const rest = value
+      .slice(uploadIndex + uploadPath.length)
+      .replace(/^f_auto,q_auto,c_limit,w_\d+\//, "");
+    return `${prefix}${transform}/${rest}`;
+  }
+
+  const fileName = value.split("/").pop();
+  const publicId = fileName.replace(/\.(mp4|webm|mov|m4v)$/i, "");
+  return `${CLOUDINARY_VIDEO_BASE}${transform}/${publicId}`;
+}
+
+function fetchLatestPetpopFromSupabase() {
+  if (!supabaseClient) {
+    return Promise.reject(new Error("Cliente de Supabase no disponible"));
+  }
+
+  return supabaseClient
+    .from("petpops")
+    .select("image,alt,pet")
+    .order("id", { ascending: false })
+    .limit(1)
+    .then(({ data, error }) => {
+      if (error) throw error;
+      if (!Array.isArray(data) || data.length === 0) {
+        throw new Error("La tabla petpops está vacía o RLS bloquea la lectura");
+      }
+      return data[0];
+    });
+}
+
+const heroPetpopPromise = fetchLatestPetpopFromSupabase().catch(() => null);
 
 document.addEventListener("DOMContentLoaded", () => {
   /* =============================================
@@ -49,6 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
     introVideo.muted = true;
     const fadeDistance = 420;
     let introFadeTicking = false;
+    let introPlaybackAllowed = false;
     const getScrollTop = () =>
       window.scrollY ||
       window.pageYOffset ||
@@ -65,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!introVideo.paused) introVideo.pause();
       } else {
         introVideoSection.style.pointerEvents = "";
-        introVideo.play().catch(() => {});
+        if (introPlaybackAllowed) introVideo.play().catch(() => {});
       }
     };
     const onIntroScroll = () => {
@@ -80,6 +143,10 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("orientationchange", onIntroScroll, {
       passive: true,
     });
+    window.setTimeout(() => {
+      introPlaybackAllowed = true;
+      updateIntroVideoFade();
+    }, 1200);
     updateIntroVideoFade();
   }
 
@@ -388,7 +455,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function collapseExpandedTestimonials(exceptCard) {
     cards.forEach((card) => {
-      if (card === exceptCard || !card.classList.contains("is-expanded")) return;
+      if (card === exceptCard || !card.classList.contains("is-expanded"))
+        return;
       card.classList.remove("is-expanded");
       const toggle = card.querySelector(".test-message-toggle");
       if (!toggle || toggle.classList.contains("is-hidden")) return;
@@ -488,7 +556,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const normalized = testimonials.map((item) => ({
         ...item,
-        image: getCloudinaryImageUrl(item.image),
+        image: getCloudinaryImageUrl(item.image, 480),
       }));
 
       renderTestimonials(normalized);
@@ -505,26 +573,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const heroImage = document.getElementById("heroProductImage");
     if (!heroImage || !item?.image) return;
 
-    heroImage.src = getCloudinaryImageUrl(item.image);
+    const imageUrl = getCloudinaryImageUrl(item.image, 900);
+    heroImage.src = imageUrl;
     heroImage.alt = item.alt || `PetPop de ${item.pet || "mascota"}`;
-  }
-
-  async function loadHeroImageFromSupabase() {
-    if (!supabaseClient) {
-      throw new Error("Cliente de Supabase no disponible");
-    }
-
-    const { data, error } = await supabaseClient
-      .from("petpops")
-      .select("image,alt,pet")
-      .order("id", { ascending: false })
-      .limit(1);
-
-    if (error) throw error;
-    if (!Array.isArray(data) || data.length === 0) {
-      throw new Error("La tabla petpops está vacía o RLS bloquea la lectura");
-    }
-    return data[0];
+    heroImage.fetchPriority = "high";
+    heroImage.decoding = "async";
   }
 
   async function loadHeroImageFromJson() {
@@ -540,13 +593,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!heroImage) return;
 
     try {
-      let item;
-      try {
-        item = await loadHeroImageFromSupabase();
-      } catch (supabaseError) {
+      let item = await heroPetpopPromise;
+      if (!item) {
         console.warn(
-          "No se pudo cargar el PetPop del hero desde Supabase. Usando petpops.json:",
-          supabaseError,
+          "No se pudo cargar el PetPop del hero desde Supabase. Usando petpops.json.",
         );
         item = await loadHeroImageFromJson();
       }
@@ -812,16 +862,27 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentGallery = 0;
   let galleryAutoPlay;
 
+  const galleryVideoLoader = document.getElementById("galleryVideoLoader");
+  let galleryVideoRequestId = 0;
+
+  function setGalleryVideoLoader(visible) {
+    if (!galleryVideoLoader) return;
+    galleryVideoLoader.hidden = !visible;
+  }
+
   function closeGalleryVideo() {
     if (!galleryVideoModal || !galleryVideoEl) return;
+    galleryVideoRequestId += 1;
     galleryVideoEl.pause();
     galleryVideoEl.removeAttribute("src");
+    galleryVideoEl.removeAttribute("poster");
     galleryVideoEl.muted = true;
     galleryVideoEl.defaultMuted = true;
     galleryVideoEl.setAttribute("muted", "");
     galleryVideoEl.loop = true;
     galleryVideoEl.controls = false;
     galleryVideoEl.load();
+    setGalleryVideoLoader(false);
     galleryVideoModal.classList.remove("open");
     galleryVideoModal.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
@@ -832,10 +893,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!url || !galleryVideoModal || !galleryVideoEl) return;
 
     const withAudio = Boolean(options.withAudio);
+    const requestId = ++galleryVideoRequestId;
 
     // Si el archivo no se puede cargar (404 / ruta incorrecta), cerramos el modal.
     const onError = () => {
       galleryVideoEl.removeEventListener("error", onError);
+      if (requestId !== galleryVideoRequestId) return;
       closeGalleryVideo();
     };
     galleryVideoEl.addEventListener("error", onError);
@@ -850,11 +913,39 @@ document.addEventListener("DOMContentLoaded", () => {
     galleryVideoEl.loop = !withAudio;
     galleryVideoEl.controls = withAudio;
     galleryVideoEl.volume = 1;
+    galleryVideoEl.preload = "auto";
+    if (options.poster) {
+      galleryVideoEl.poster = options.poster;
+    } else {
+      galleryVideoEl.removeAttribute("poster");
+    }
+
+    const tryPlay = () => {
+      if (requestId !== galleryVideoRequestId) return;
+      galleryVideoEl.play().catch(() => {});
+    };
+    const hideLoader = () => {
+      if (requestId !== galleryVideoRequestId) return;
+      setGalleryVideoLoader(false);
+    };
+
+    galleryVideoEl.addEventListener(
+      "canplay",
+      () => {
+        hideLoader();
+        tryPlay();
+      },
+      { once: true },
+    );
+    galleryVideoEl.addEventListener("playing", hideLoader, { once: true });
+
+    setGalleryVideoLoader(true);
     galleryVideoEl.src = url;
+    galleryVideoEl.load();
     galleryVideoModal.classList.add("open");
     galleryVideoModal.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
-    galleryVideoEl.play().catch(() => {});
+    tryPlay();
   }
 
   function bindGalleryCard(card) {
@@ -877,7 +968,9 @@ document.addEventListener("DOMContentLoaded", () => {
     card.addEventListener("click", () => {
       const videoSrc = card.getAttribute("data-video");
       if (!videoSrc || !String(videoSrc).trim()) return;
-      openGalleryVideo(videoSrc);
+      openGalleryVideo(videoSrc, {
+        poster: card.querySelector(".gallery-image")?.src,
+      });
     });
 
     card.addEventListener("keydown", (e) => {
@@ -885,7 +978,9 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       const videoSrc = card.getAttribute("data-video");
       if (!videoSrc || !String(videoSrc).trim()) return;
-      openGalleryVideo(videoSrc);
+      openGalleryVideo(videoSrc, {
+        poster: card.querySelector(".gallery-image")?.src,
+      });
     });
   }
 
@@ -914,6 +1009,8 @@ document.addEventListener("DOMContentLoaded", () => {
     image.className = "gallery-image";
     image.src = model.image || "";
     image.alt = model.alt || model.name || "Modelo PetPop";
+    image.loading = "lazy";
+    image.decoding = "async";
 
     const info = document.createElement("div");
     info.className = "gallery-info";
@@ -1091,7 +1188,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     return data.map((model) => ({
       ...model,
-      image: getCloudinaryImageUrl(model.image),
+      image: getCloudinaryImageUrl(model.image, 600),
     }));
   }
 
@@ -1109,6 +1206,10 @@ document.addEventListener("DOMContentLoaded", () => {
           supabaseError,
         );
         models = await loadGalleryModelsFromJson();
+        models = models.map((model) => ({
+          ...model,
+          image: getCloudinaryImageUrl(model.image, 600),
+        }));
       }
 
       if (!Array.isArray(models) || models.length === 0) return;
@@ -1318,7 +1419,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const normalized = items.map((item) => ({
         ...item,
-        image: getCloudinaryImageUrl(item.image),
+        image: getCloudinaryImageUrl(item.image, 600),
       }));
 
       renderPetpops(normalized);
@@ -1372,7 +1473,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (theme) card.dataset.theme = theme;
 
     const slug = item.slug ? String(item.slug).trim() : "";
-    const videoSrc = slug ? `videos/${slug}.mp4` : "";
+    const videoSrc = item.video || getCloudinaryVideoUrl(slug);
 
     const imageWrap = document.createElement("div");
     imageWrap.className = `edition-img-wrap${videoSrc ? " has-video" : ""}`;
@@ -1408,7 +1509,10 @@ document.addEventListener("DOMContentLoaded", () => {
       imageWrap.appendChild(hint);
 
       const playEditionVideo = () =>
-        openGalleryVideo(videoSrc, { withAudio: true });
+        openGalleryVideo(videoSrc, {
+          withAudio: true,
+          poster: item.image,
+        });
       imageWrap.addEventListener("click", playEditionVideo);
       imageWrap.addEventListener("keydown", (e) => {
         if (e.key !== "Enter" && e.key !== " ") return;
@@ -1507,7 +1611,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const normalized = items.map((item) => ({
         ...item,
-        image: getCloudinaryImageUrl(item.image),
+        image: getCloudinaryImageUrl(item.image, 600),
+        video: getCloudinaryVideoUrl(item.slug, 720),
       }));
 
       renderEditions(normalized);
