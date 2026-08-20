@@ -10,6 +10,8 @@
   <link rel="apple-touch-icon" href="images/logo-min2.png">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+  <link rel="preconnect" href="https://walpqiwxbawdhllizxtw.supabase.co" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐾</text></svg>">
 </head>
@@ -48,11 +50,10 @@
       <video
         id="introVideo"
         class="intro-video"
-        autoplay
         muted
         loop
         playsinline
-        preload="metadata"
+        preload="none"
       >
         <!-- Cambia la ruta por tu clip (p. ej. videos/gatito1.mp4) -->
         <source src="videos/intro2.mp4" type="video/mp4" />
@@ -105,7 +106,7 @@
       <!-- 🖼️ HERO VISUAL - CAMBIAR AQUÍ TUS IMÁGENES -->
     <div class="hero-visual animate-float">
      <div class="hero-product-image">
-      <img id="heroProductImage" src="" alt="PetPop personalizado - Figuras de yeso estilo Funko Pop" />
+      <img id="heroProductImage" src="" alt="PetPop personalizado - Figuras de yeso estilo Funko Pop" fetchpriority="high" decoding="async" />
       <div class="hero-product-badge">¡Nuevo Peludo!</div>
     </div>
       
@@ -157,7 +158,7 @@
 
       <div class="product-detail">
         <div class="product-detail-img card-reveal">
-          <img src="https://res.cloudinary.com/xyzma0pz/image/upload/v1784574342/petpop-description.png" alt="Detalle del PetPop - Calidad artesanal y caja personalizada" />
+          <img src="https://res.cloudinary.com/xyzma0pz/image/upload/f_auto,q_auto,c_limit,w_800/v1784574342/petpop-description.png" alt="Detalle del PetPop - Calidad artesanal y caja personalizada" loading="lazy" decoding="async" />
           
           <div class="detail-tags">
             <span class="dtag">✅ Hecho y pintado a mano</span>
@@ -556,7 +557,7 @@
             <!-- <div class="form-row"> -->
               <div class="form-group">
                 <label for="colorBoxImage">Colores de cajas disponibles</label>
-                <img src="images/colores-cajas.png" alt="Color de caja" class="color-box-image" />
+                <img src="images/colores-cajas.png" alt="Color de caja" class="color-box-image" loading="lazy" decoding="async" />
               </div>
               <div class="form-group">
                 <select id="colorBox" name="colorBox" required>
@@ -714,7 +715,11 @@
     <div class="gallery-video-modal-backdrop" aria-hidden="true"></div>
     <div class="gallery-video-modal-content">
       <button type="button" class="gallery-video-modal-close" aria-label="Cerrar video">×</button>
-      <video class="gallery-video-modal-video" id="galleryVideoModalVideo" autoplay muted loop playsinline></video>
+      <div class="gallery-video-loader" id="galleryVideoLoader" hidden>
+        <span class="gallery-video-loader-spinner" aria-hidden="true"></span>
+        <span>Cargando video…</span>
+      </div>
+      <video class="gallery-video-modal-video" id="galleryVideoModalVideo" playsinline preload="auto"></video>
     </div>
   </div>
 
