@@ -727,7 +727,6 @@ document.addEventListener("DOMContentLoaded", () => {
           (petAge ? `📅 Edad: ${petAge}\n` : "") +
           (petNicknames ? `📝 Apodos: ${petNicknames}\n` : "") +
           (petActivity ? `🏃 Actividad favorita: ${petActivity}\n` : "") +
-          `--------------------------------\n` +
           (colorBox ? `🎨 Color de caja: ${colorBox}\n` : "") +
           (postalCode
             ? `🏢 Quiero que envíen mi PetPop a este código postal: ${postalCode}\n`
