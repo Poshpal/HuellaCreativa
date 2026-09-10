@@ -318,15 +318,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let cards = [];
   let current = 0;
 
-  function getTestimonialEmoji(pet) {
-    const value = String(pet || "");
-    if (value.includes("🐈") || value.toLowerCase().includes("gato"))
-      return "🐈";
-    if (value.includes("🐕") || value.toLowerCase().includes("perro"))
-      return "🐕";
-    return "🐾";
-  }
-
   function createTestimonialCard(testimonial) {
     const card = document.createElement("div");
     card.className = "testimonial-card";
@@ -397,9 +388,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const pet = document.createElement("div");
     pet.className = "test-author";
-    const avatar = document.createElement("div");
-    avatar.className = "test-avatar";
-    avatar.textContent = getTestimonialEmoji(testimonial.pet);
 
     const authorCopy = document.createElement("div");
     authorCopy.className = "test-author-copy";
@@ -409,7 +397,7 @@ document.addEventListener("DOMContentLoaded", () => {
     place.className = "test-place";
     place.textContent = testimonial.place || "";
     authorCopy.append(petName, place);
-    pet.append(avatar, authorCopy);
+    pet.append(authorCopy);
 
     body.append(top, quote, messageWrap, pet);
     card.appendChild(body);
