@@ -1262,6 +1262,8 @@ document.addEventListener("DOMContentLoaded", () => {
   ============================================= */
   const petpopsGrid = document.getElementById("petpopsGrid");
   const petpopsDotsWrap = document.getElementById("petpopsDots");
+  const petpopsPrev = document.getElementById("petpopsPrev");
+  const petpopsNext = document.getElementById("petpopsNext");
   let petpopCards = [];
   let petpopDots = [];
   let currentPetpop = 0;
@@ -1317,15 +1319,34 @@ document.addEventListener("DOMContentLoaded", () => {
     return dot;
   }
 
+  function getPetpopStep() {
+    const firstCard = petpopCards[0];
+    if (!petpopsGrid || !firstCard) return 0;
+    const gap = parseFloat(getComputedStyle(petpopsGrid).columnGap) || 24;
+    return firstCard.offsetWidth + gap;
+  }
+
   function goToPetpop(index) {
     if (!petpopsGrid || !petpopCards || petpopCards.length === 0) return;
 
     currentPetpop = index;
-    const firstCard = petpopCards[0];
-    if (!firstCard) return;
+    const card = petpopCards[index];
+    if (!card) return;
 
-    const cardWidth = firstCard.offsetWidth + 24;
-    petpopsGrid.scrollTo({ left: cardWidth * index, behavior: "smooth" });
+    if (window.matchMedia("(max-width: 768px)").matches) {
+      const gridRect = petpopsGrid.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+      const left =
+        petpopsGrid.scrollLeft +
+        (cardRect.left - gridRect.left) -
+        (gridRect.width - cardRect.width) / 2;
+      petpopsGrid.scrollTo({ left, behavior: "smooth" });
+    } else {
+      petpopsGrid.scrollTo({
+        left: getPetpopStep() * index,
+        behavior: "smooth",
+      });
+    }
     petpopDots.forEach((dot, i) => dot.classList.toggle("active", i === index));
   }
 
@@ -1337,6 +1358,15 @@ document.addEventListener("DOMContentLoaded", () => {
         startPetpopsAutoPlay();
       }),
     );
+  }
+
+  function shiftPetpop(direction) {
+    if (!petpopCards || petpopCards.length === 0) return;
+    const nextIndex =
+      (currentPetpop + direction + petpopCards.length) % petpopCards.length;
+    clearInterval(petpopsAutoPlay);
+    goToPetpop(nextIndex);
+    startPetpopsAutoPlay();
   }
 
   function startPetpopsAutoPlay() {
@@ -1413,6 +1443,11 @@ document.addEventListener("DOMContentLoaded", () => {
       bindPetpopDots();
       goToPetpop(0);
       startPetpopsAutoPlay();
+      if (petpopsPrev && petpopsNext) {
+        const showArrows = normalized.length > 1;
+        petpopsPrev.hidden = !showArrows;
+        petpopsNext.hidden = !showArrows;
+      }
     } catch (error) {
       console.error("Error cargando PetPops entregados:", error);
       petpopsGrid.innerHTML =
@@ -1420,19 +1455,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  if (petpopsPrev) {
+    petpopsPrev.addEventListener("click", () => shiftPetpop(-1));
+  }
+  if (petpopsNext) {
+    petpopsNext.addEventListener("click", () => shiftPetpop(1));
+  }
+
   if (petpopsGrid) {
     petpopsGrid.addEventListener(
       "scroll",
       () => {
         if (!petpopCards || petpopCards.length === 0) return;
-        const firstCard = petpopCards[0];
-        if (!firstCard) return;
-        const cardWidth = firstCard.offsetWidth + 24;
+        const step = getPetpopStep();
+        if (!step) return;
         const index = Math.max(
           0,
           Math.min(
             petpopCards.length - 1,
-            Math.round(petpopsGrid.scrollLeft / cardWidth),
+            Math.round(petpopsGrid.scrollLeft / step),
           ),
         );
         petpopDots.forEach((dot, i) =>
@@ -1440,6 +1481,22 @@ document.addEventListener("DOMContentLoaded", () => {
         );
         currentPetpop = index;
       },
+      { passive: true },
+    );
+
+    petpopsGrid.addEventListener(
+      "pointerdown",
+      () => clearInterval(petpopsAutoPlay),
+      { passive: true },
+    );
+    petpopsGrid.addEventListener(
+      "pointerup",
+      () => startPetpopsAutoPlay(),
+      { passive: true },
+    );
+    petpopsGrid.addEventListener(
+      "pointercancel",
+      () => startPetpopsAutoPlay(),
       { passive: true },
     );
   }
