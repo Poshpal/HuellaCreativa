@@ -693,6 +693,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const accept = document.getElementById("accept").checked;
       const colorBox = document.getElementById("colorBox").value;
       const postalCode = document.getElementById("postalCode").value.trim();
+      const colonia = document.getElementById("colonia")?.value.trim() || "";
 
       const petTypeLabels = {
         gato: "🐱 Gato",
@@ -717,8 +718,9 @@ document.addEventListener("DOMContentLoaded", () => {
           (petActivity ? `🏃 Actividad favorita: ${petActivity}\n` : "") +
           (colorBox ? `🎨 Color de caja: ${colorBox}\n` : "") +
           (postalCode
-            ? `🏢 Quiero que envíen mi PetPop a este código postal: ${postalCode}\n`
+            ? `🏢 Código postal: ${postalCode}\n`
             : "") +
+          (colonia ? `📍 Colonia: ${colonia}\n` : "") +
           (message ? `💬 Mensaje/Datos extra: ${message}\n` : "") +
           `--------------------------------\n` +
           (accept
