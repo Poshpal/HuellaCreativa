@@ -298,15 +298,42 @@ document.addEventListener("DOMContentLoaded", () => {
   ============================================= */
   const faqItems = document.querySelectorAll(".faq-item");
 
+  function setFaqAnswerHeight(item) {
+    const answer = item.querySelector(".faq-answer");
+    if (!answer || !item.classList.contains("active")) return;
+    answer.style.maxHeight = answer.scrollHeight + "px";
+  }
+
+  function closeFaqItem(item) {
+    const answer = item.querySelector(".faq-answer");
+    item.classList.remove("active");
+    if (answer) answer.style.maxHeight = "0px";
+  }
+
+  function openFaqItem(item) {
+    item.classList.add("active");
+    setFaqAnswerHeight(item);
+  }
+
   faqItems.forEach((item) => {
     const btn = item.querySelector(".faq-question");
+    const answer = item.querySelector(".faq-answer");
     btn.addEventListener("click", () => {
       const isOpen = item.classList.contains("active");
-      // Close all
-      faqItems.forEach((i) => i.classList.remove("active"));
-      // Toggle current
-      if (!isOpen) item.classList.add("active");
+      faqItems.forEach((i) => closeFaqItem(i));
+      if (!isOpen) openFaqItem(item);
     });
+
+    const img = answer?.querySelector("img");
+    if (!img) return;
+    const syncOpenHeight = () => setFaqAnswerHeight(item);
+    if (img.complete) syncOpenHeight();
+    else img.addEventListener("load", syncOpenHeight);
+  });
+
+  window.addEventListener("resize", () => {
+    const openItem = document.querySelector(".faq-item.active");
+    if (openItem) setFaqAnswerHeight(openItem);
   });
 
   /* =============================================
