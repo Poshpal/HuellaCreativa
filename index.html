@@ -373,7 +373,43 @@
           role="tablist"
           aria-label="Filtrar modelos por tipo"
         ></div>
-        <div class="gallery-grid" id="galleryGrid" aria-live="polite"></div>
+        <div class="gallery-carousel">
+          <button
+            class="gallery-nav gallery-nav-prev"
+            id="galleryPrev"
+            type="button"
+            aria-label="Ver modelo anterior"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M15.5 5.5 9 12l6.5 6.5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <div class="gallery-grid" id="galleryGrid" aria-live="polite"></div>
+          <button
+            class="gallery-nav gallery-nav-next"
+            id="galleryNext"
+            type="button"
+            aria-label="Ver siguiente modelo"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M8.5 5.5 15 12l-6.5 6.5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
         <div
           class="gallery-dots"
           id="galleryDots"

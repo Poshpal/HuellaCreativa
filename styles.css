@@ -1119,6 +1119,10 @@ select {
   box-shadow: 0 12px 30px rgba(255, 107, 53, 0.28);
 }
 
+.gallery-carousel {
+  position: relative;
+}
+
 .gallery-grid {
   display: flex;
   gap: 1.5rem;
@@ -1128,6 +1132,43 @@ select {
   padding-bottom: 1rem;
   margin-bottom: 0;
   scrollbar-width: none;
+}
+
+.gallery-nav {
+  display: none;
+  position: absolute;
+  top: 42%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: var(--white);
+  color: var(--primary);
+  box-shadow: 0 8px 22px rgba(45, 45, 45, 0.18);
+  cursor: pointer;
+  transition:
+    transform var(--transition),
+    background var(--transition),
+    box-shadow var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+.gallery-nav svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+.gallery-nav-prev {
+  left: 4px;
+}
+.gallery-nav-next {
+  right: 4px;
+}
+.gallery-nav:active {
+  transform: translateY(-50%) scale(0.94);
 }
 .gallery-grid::-webkit-scrollbar {
   display: none;
@@ -3140,8 +3181,26 @@ input[type="number"] {
   .gallery-tabs {
     margin-top: -0.5rem;
   }
+  .gallery-grid {
+    --gallery-card-w: min(280px, calc(100vw - 7.5rem));
+    gap: 1.25rem;
+    padding-left: calc((100% - var(--gallery-card-w)) / 2);
+    padding-right: calc((100% - var(--gallery-card-w)) / 2);
+  }
   .gallery-card {
-    flex: 0 0 280px;
+    flex: 0 0 var(--gallery-card-w);
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+  }
+  .gallery-card:hover {
+    transform: none;
+    box-shadow: var(--shadow);
+  }
+  .gallery-dots {
+    display: none;
+  }
+  .gallery-nav:not([hidden]) {
+    display: flex;
   }
   .petpops-grid {
     --petpop-card-w: min(260px, calc(100vw - 7.5rem));
@@ -3213,8 +3272,8 @@ input[type="number"] {
     padding: 0.58rem 1rem;
     font-size: 0.9rem;
   }
-  .gallery-card {
-    flex: 0 0 260px;
+  .gallery-grid {
+    --gallery-card-w: min(260px, calc(100vw - 6.5rem));
   }
   .petpops-grid {
     --petpop-card-w: min(250px, calc(100vw - 6.5rem));

@@ -863,6 +863,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const galleryGrid = document.getElementById("galleryGrid");
   const galleryTabsWrap = document.getElementById("galleryTabs");
   const galleryDotsWrap = document.getElementById("galleryDots");
+  const galleryPrev = document.getElementById("galleryPrev");
+  const galleryNext = document.getElementById("galleryNext");
   const galleryVideoModal = document.getElementById("galleryVideoModal");
   const galleryVideoEl = document.getElementById("galleryVideoModalVideo");
   const galleryModalClose = document.querySelector(
@@ -876,7 +878,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let galleryModels = [];
   let currentGalleryType = "Todos";
   let currentGallery = 0;
-  let galleryAutoPlay;
 
   const galleryVideoLoader = document.getElementById("galleryVideoLoader");
   let galleryVideoRequestId = 0;
@@ -1113,12 +1114,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const tab = createGalleryTab(type, type === currentGalleryType);
       tab.addEventListener("click", () => {
         currentGalleryType = type;
-        clearInterval(galleryAutoPlay);
         setActiveGalleryTab(type);
         renderGalleryModels(getFilteredGalleryModels());
         bindGalleryDots();
         goToGalleryModel(0);
-        startGalleryAutoPlay();
       });
       galleryTabsWrap.appendChild(tab);
     });
@@ -1131,37 +1130,63 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
+  function isGalleryMobile() {
+    return window.matchMedia("(max-width: 768px)").matches;
+  }
+
+  function getGalleryStep() {
+    const firstCard = galleryCards[0];
+    if (!galleryGrid || !firstCard) return 0;
+    const gap = parseFloat(getComputedStyle(galleryGrid).columnGap) || 24;
+    return firstCard.offsetWidth + gap;
+  }
+
+  function updateGalleryArrows() {
+    if (!galleryPrev || !galleryNext) return;
+    const showArrows = galleryCards.length > 1;
+    galleryPrev.hidden = !showArrows;
+    galleryNext.hidden = !showArrows;
+  }
+
   function goToGalleryModel(index) {
     if (!galleryGrid || !galleryCards || galleryCards.length === 0) return;
 
     currentGallery = index;
-    const firstCard = galleryCards[0];
-    if (!firstCard) return;
+    const card = galleryCards[index];
+    if (!card) return;
 
-    const cardWidth = firstCard.offsetWidth + 24; // gap = 24px
-    galleryGrid.scrollTo({ left: cardWidth * index, behavior: "smooth" });
+    if (isGalleryMobile()) {
+      const gridRect = galleryGrid.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+      const left =
+        galleryGrid.scrollLeft +
+        (cardRect.left - gridRect.left) -
+        (gridRect.width - cardRect.width) / 2;
+      galleryGrid.scrollTo({ left, behavior: "smooth" });
+    } else {
+      galleryGrid.scrollTo({
+        left: getGalleryStep() * index,
+        behavior: "smooth",
+      });
+    }
     galleryDots.forEach((dot, i) =>
       dot.classList.toggle("active", i === index),
     );
   }
 
+  function shiftGallery(direction) {
+    if (!galleryCards || galleryCards.length === 0) return;
+    const nextIndex =
+      (currentGallery + direction + galleryCards.length) % galleryCards.length;
+    goToGalleryModel(nextIndex);
+  }
+
   function bindGalleryDots() {
     galleryDots.forEach((dot, index) =>
       dot.addEventListener("click", () => {
-        clearInterval(galleryAutoPlay);
         goToGalleryModel(index);
-        startGalleryAutoPlay();
       }),
     );
-  }
-
-  function startGalleryAutoPlay() {
-    if (!galleryGrid || !galleryCards || galleryCards.length === 0) return;
-
-    clearInterval(galleryAutoPlay);
-    galleryAutoPlay = setInterval(() => {
-      goToGalleryModel((currentGallery + 1) % galleryCards.length);
-    }, 4500);
   }
 
   function renderGalleryModels(models) {
@@ -1179,6 +1204,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     galleryCards = Array.from(galleryGrid.querySelectorAll(".gallery-card"));
     galleryDots = Array.from(galleryDotsWrap.querySelectorAll(".dot"));
+    updateGalleryArrows();
   }
 
   async function loadGalleryModelsFromJson() {
@@ -1236,12 +1262,18 @@ document.addEventListener("DOMContentLoaded", () => {
       renderGalleryModels(getFilteredGalleryModels());
       bindGalleryDots();
       goToGalleryModel(0);
-      startGalleryAutoPlay();
     } catch (error) {
       console.error("Error cargando modelos:", error);
       galleryGrid.innerHTML =
         '<p class="section-subtitle">No se pudieron cargar los modelos por el momento.</p>';
     }
+  }
+
+  if (galleryPrev) {
+    galleryPrev.addEventListener("click", () => shiftGallery(-1));
+  }
+  if (galleryNext) {
+    galleryNext.addEventListener("click", () => shiftGallery(1));
   }
 
   if (galleryGrid) {
@@ -1250,15 +1282,14 @@ document.addEventListener("DOMContentLoaded", () => {
       () => {
         if (!galleryCards || galleryCards.length === 0) return;
 
-        const firstCard = galleryCards[0];
-        if (!firstCard) return;
+        const step = getGalleryStep();
+        if (!step) return;
 
-        const cardWidth = firstCard.offsetWidth + 24;
         const index = Math.max(
           0,
           Math.min(
             galleryCards.length - 1,
-            Math.round(galleryGrid.scrollLeft / cardWidth),
+            Math.round(galleryGrid.scrollLeft / step),
           ),
         );
         galleryDots.forEach((dot, i) =>
