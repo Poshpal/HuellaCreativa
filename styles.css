@@ -2598,6 +2598,16 @@ input[type="number"] {
   color: var(--gray);
   cursor: pointer;
 }
+.form-check label a {
+  color: var(--primary);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.form-check label a:hover,
+.form-check label a:focus-visible {
+  color: var(--primary-d);
+}
 
 .form-notice {
   display: grid;
