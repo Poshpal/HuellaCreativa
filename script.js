@@ -12,6 +12,8 @@ const CLOUDINARY_IMAGE_BASE =
 const CLOUDINARY_VIDEO_BASE =
   "https://res.cloudinary.com/xyzma0pz/video/upload/";
 
+const FALLBACK_WHATSAPP_NUMBER = "5215635038583";
+let siteWhatsappNumber = FALLBACK_WHATSAPP_NUMBER;
 let supabaseClient = null;
 try {
   if (window.supabase && typeof window.supabase.createClient === "function") {
@@ -100,7 +102,65 @@ function fetchLatestPetpopFromSupabase() {
 
 const heroPetpopPromise = fetchLatestPetpopFromSupabase().catch(() => null);
 
+function buildWhatsappHref(number, text) {
+  const clean = String(number || "").replace(/\D/g, "");
+  if (!clean) return "";
+  if (!text) return `https://wa.me/${clean}`;
+  return `https://wa.me/${clean}?text=${encodeURIComponent(text)}`;
+}
+
+function applySiteLinks(links) {
+  const number = String(links.whatsapp_number || "").replace(/\D/g, "");
+  if (number) siteWhatsappNumber = number;
+
+  const hrefByKey = {
+    email: links.email ? `mailto:${String(links.email).trim()}` : "",
+    facebook: links.facebook_url || "",
+    instagram: links.instagram_url || "",
+    tiktok: links.tiktok_url || "",
+    terms: links.terms_url || "",
+    privacy: links.privacy_url || "",
+  };
+
+  document.querySelectorAll("[data-site]").forEach((el) => {
+    const key = el.dataset.site;
+    if (key === "whatsapp") {
+      if (el.id === "formWhatsappLink" && el.search.includes("text=")) return;
+      const text = (el.dataset.waText || "").replace(/\\n/g, "\n");
+      const href = buildWhatsappHref(siteWhatsappNumber, text);
+      if (href) el.href = href;
+      return;
+    }
+    if (hrefByKey[key]) el.href = hrefByKey[key];
+  });
+}
+
+async function loadSiteLinks() {
+  if (!supabaseClient) {
+    throw new Error("Cliente de Supabase no disponible");
+  }
+
+  const { data, error } = await supabaseClient
+    .from("site_links")
+    .select(
+      "email, whatsapp_number, facebook_url, instagram_url, tiktok_url, terms_url, privacy_url",
+    )
+    .eq("id", 1)
+    .single();
+
+  if (error) throw error;
+  if (!data) throw new Error("La tabla site_links no devolvió enlaces");
+  applySiteLinks(data);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+  loadSiteLinks().catch((error) => {
+    console.warn(
+      "No se pudieron cargar los enlaces desde Supabase. Se conservan los del HTML:",
+      error,
+    );
+  });
+
   /* =============================================
      INTRO VIDEO: loop silenciado + desvanecer al scroll
   ============================================= */
@@ -663,7 +723,9 @@ document.addEventListener("DOMContentLoaded", () => {
       .forEach((field) => clearError(field));
 
     const accept = document.getElementById("accept");
+    const terms = document.getElementById("terms");
     if (accept) accept.style.outline = "";
+    if (terms) terms.style.outline = "";
 
     togglePetTypeOther();
 
@@ -718,6 +780,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const petActivity = document.getElementById("petActivity").value.trim();
       const message = document.getElementById("message").value.trim();
       const accept = document.getElementById("accept").checked;
+      const terms = document.getElementById("terms").checked;
       const colorBox = document.getElementById("colorBox").value;
       const postalCode = document.getElementById("postalCode").value.trim();
       const colonia = document.getElementById("colonia")?.value.trim() || "";
@@ -744,18 +807,22 @@ document.addEventListener("DOMContentLoaded", () => {
           (petNicknames ? `📝 Apodos: ${petNicknames}\n` : "") +
           (petActivity ? `🏃 Actividad favorita: ${petActivity}\n` : "") +
           (colorBox ? `🎨 Color de caja: ${colorBox}\n` : "") +
+           (message ? `💬 Mensaje/Datos extra: ${message}\n` : "") +
+          `--------------------------------\n` +
           (postalCode
             ? `🏢 Código postal: ${postalCode}\n`
             : "") +
           (colonia ? `📍 Colonia: ${colonia}\n` : "") +
-          (message ? `💬 Mensaje/Datos extra: ${message}\n` : "") +
           `--------------------------------\n` +
           (accept
-            ? `💰 Acepto dar $100 de anticipo para que agenden mi pedido`
+            ? `💰 Acepto dar $100 de anticipo para que agenden mi pedido\n`
+            : "") +
+          (terms
+            ? `👮 Acepto los Términos y condiciones y el Aviso de Privacidad`
             : ""),
       );
 
-      const whatsappUrl = `https://wa.me/5215635038583?text=${waMsg}`;
+      const whatsappUrl = `https://wa.me/${siteWhatsappNumber}?text=${waMsg}`;
       const waLink = document.getElementById("formWhatsappLink");
       if (waLink) waLink.href = whatsappUrl;
 
@@ -802,6 +869,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const petNicknames = document.getElementById("petNicknames");
     const petActivity = document.getElementById("petActivity");
     const accept = document.getElementById("accept");
+    const terms = document.getElementById("terms");
     const colorBox = document.getElementById("colorBox");
 
     if (!ownerName.value.trim()) {
@@ -853,6 +921,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!colorBox.value) {
       showError(colorBox, "Selecciona el color de la caja.");
       valid = false;
+    }
+    if (!terms.checked) {
+      terms.style.outline = "2px solid #e74c3c";
+      showError(terms, "Acepta los Términos y condiciones y el Aviso de Privacidad.");
+      valid = false;
+    } else {
+      terms.style.outline = "";
     }
     return valid;
   }

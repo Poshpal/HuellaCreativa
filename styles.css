@@ -2573,6 +2573,14 @@ input[type="number"] {
   min-height: 1em;
 }
 
+.form-checks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.form-checks .form-error:empty {
+  display: none;
+}
 .form-check {
   display: flex;
   align-items: flex-start;
