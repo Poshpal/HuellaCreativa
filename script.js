@@ -818,7 +818,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ? `💰 Acepto dar $100 de anticipo para que agenden mi pedido\n`
             : "") +
           (terms
-            ? `👮 Acepto los Términos y condiciones y el Aviso de Privacidad`
+            ? `✅ Leí y acepto los Términos y condiciones y el Aviso de Privacidad`
             : ""),
       );
 
