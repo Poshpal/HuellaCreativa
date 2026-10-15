@@ -6,7 +6,8 @@
 "use strict";
 
 const SUPABASE_URL = "https://walpqiwxbawdhllizxtw.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_Z6dG8LOXQZMxjgydCxOgxg_AEbMmXqE";
+const SITE_CONTENT_URL = `${SUPABASE_URL}/functions/v1/site-content`;
+const SITE_GO_URL = `${SUPABASE_URL}/functions/v1/go`;
 const CLOUDINARY_IMAGE_BASE =
   "https://res.cloudinary.com/xyzma0pz/image/upload/";
 const CLOUDINARY_VIDEO_BASE =
@@ -14,19 +15,23 @@ const CLOUDINARY_VIDEO_BASE =
 
 const FALLBACK_WHATSAPP_NUMBER = "5215635038583";
 let siteWhatsappNumber = FALLBACK_WHATSAPP_NUMBER;
-let supabaseClient = null;
-try {
-  if (window.supabase && typeof window.supabase.createClient === "function") {
-    supabaseClient = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_ANON_KEY,
-    );
+
+let siteContentPromise = null;
+
+function loadSiteContent() {
+  if (!siteContentPromise) {
+    siteContentPromise = fetch(SITE_CONTENT_URL).then(async (response) => {
+      if (!response.ok) {
+        throw new Error("No se pudo cargar el contenido del sitio");
+      }
+      const data = await response.json();
+      if (!data || data.error) {
+        throw new Error(data?.error || "Respuesta de contenido vacía");
+      }
+      return data;
+    });
   }
-} catch (error) {
-  console.warn(
-    "Supabase no disponible. Se usarán los archivos JSON locales:",
-    error,
-  );
+  return siteContentPromise;
 }
 
 const CLOUDINARY_UPLOAD_PATH = "/image/upload/";
@@ -82,22 +87,13 @@ function getCloudinaryVideoUrl(video, width = 720) {
 }
 
 function fetchLatestPetpopFromSupabase() {
-  if (!supabaseClient) {
-    return Promise.reject(new Error("Cliente de Supabase no disponible"));
-  }
-
-  return supabaseClient
-    .from("petpops")
-    .select("image,alt,pet")
-    .order("id", { ascending: false })
-    .limit(1)
-    .then(({ data, error }) => {
-      if (error) throw error;
-      if (!Array.isArray(data) || data.length === 0) {
-        throw new Error("La tabla petpops está vacía o RLS bloquea la lectura");
-      }
-      return data[0];
-    });
+  return loadSiteContent().then((content) => {
+    const latest = content.petpops?.[0];
+    if (!latest) {
+      throw new Error("No hay PetPops en el contenido del sitio");
+    }
+    return latest;
+  });
 }
 
 const heroPetpopPromise = fetchLatestPetpopFromSupabase().catch(() => null);
@@ -118,8 +114,8 @@ function applySiteLinks(links) {
     facebook: links.facebook_url || "",
     instagram: links.instagram_url || "",
     tiktok: links.tiktok_url || "",
-    terms: links.terms_url || "",
-    privacy: links.privacy_url || "",
+    terms: `${SITE_GO_URL}?to=terms`,
+    privacy: `${SITE_GO_URL}?to=privacy`,
   };
 
   document.querySelectorAll("[data-site]").forEach((el) => {
@@ -136,29 +132,20 @@ function applySiteLinks(links) {
 }
 
 async function loadSiteLinks() {
-  if (!supabaseClient) {
-    throw new Error("Cliente de Supabase no disponible");
+  const content = await loadSiteContent();
+  if (!content.links) {
+    throw new Error("El contenido del sitio no devolvió enlaces");
   }
-
-  const { data, error } = await supabaseClient
-    .from("site_links")
-    .select(
-      "email, whatsapp_number, facebook_url, instagram_url, tiktok_url, terms_url, privacy_url",
-    )
-    .eq("id", 1)
-    .single();
-
-  if (error) throw error;
-  if (!data) throw new Error("La tabla site_links no devolvió enlaces");
-  applySiteLinks(data);
+  applySiteLinks(content.links);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   loadSiteLinks().catch((error) => {
     console.warn(
-      "No se pudieron cargar los enlaces desde Supabase. Se conservan los del HTML:",
+      "No se pudieron cargar los enlaces. Se usa el WhatsApp de respaldo:",
       error,
     );
+    applySiteLinks({ whatsapp_number: FALLBACK_WHATSAPP_NUMBER });
   });
 
   /* =============================================
@@ -592,20 +579,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function loadTestimonialsFromSupabase() {
-    if (!supabaseClient) {
-      throw new Error("Cliente de Supabase no disponible");
-    }
-
-    const { data, error } = await supabaseClient
-      .from("testimonials")
-      .select("rating,message,pet,image,alt,place")
-      .order("id", { ascending: false });
-
-    if (error) throw error;
+    const content = await loadSiteContent();
+    const data = content.testimonials;
     if (!Array.isArray(data) || data.length === 0) {
-      throw new Error(
-        "La tabla testimonials está vacía o RLS bloquea la lectura",
-      );
+      throw new Error("No hay testimonios en el contenido del sitio");
     }
     return data;
   }
@@ -1300,18 +1277,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function loadGalleryModelsFromSupabase() {
-    if (!supabaseClient) {
-      throw new Error("Cliente de Supabase no disponible");
-    }
-
-    const { data, error } = await supabaseClient
-      .from("models")
-      .select("name,image,alt,description,video,type")
-      .order("id", { ascending: true });
-
-    if (error) throw error;
+    const content = await loadSiteContent();
+    const data = content.models;
     if (!Array.isArray(data) || data.length === 0) {
-      throw new Error("La tabla models está vacía o RLS bloquea la lectura");
+      throw new Error("No hay modelos en el contenido del sitio");
     }
 
     return data.map((model) => ({
@@ -1546,18 +1515,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function loadPetpopsFromSupabase() {
-    if (!supabaseClient) {
-      throw new Error("Cliente de Supabase no disponible");
-    }
-
-    const { data, error } = await supabaseClient
-      .from("petpops")
-      .select("pet,place,image,alt")
-      .order("id", { ascending: false });
-
-    if (error) throw error;
+    const content = await loadSiteContent();
+    const data = content.petpops;
     if (!Array.isArray(data) || data.length === 0) {
-      throw new Error("La tabla petpops está vacía o RLS bloquea la lectura");
+      throw new Error("No hay PetPops en el contenido del sitio");
     }
     return data;
   }
@@ -1756,24 +1717,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function loadEditionsFromSupabase() {
-    if (!supabaseClient) {
-      throw new Error("Cliente de Supabase no disponible");
-    }
-
-    const { data, error } = await supabaseClient
-      .from("special_editions")
-      .select(
-        "title,slug,theme,description,image,alt,badge,year,is_available,is_featured,sort_order",
-      )
-      .eq("is_available", true)
-      .order("sort_order", { ascending: true })
-      .order("id", { ascending: false });
-
-    if (error) throw error;
+    const content = await loadSiteContent();
+    const data = content.special_editions;
     if (!Array.isArray(data) || data.length === 0) {
-      throw new Error(
-        "La tabla special_editions está vacía o RLS bloquea la lectura",
-      );
+      throw new Error("No hay ediciones en el contenido del sitio");
     }
     return data;
   }
