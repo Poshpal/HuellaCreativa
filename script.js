@@ -724,8 +724,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const accept = document.getElementById("accept");
     const terms = document.getElementById("terms");
+    const privacy = document.getElementById("privacy");
     if (accept) accept.style.outline = "";
     if (terms) terms.style.outline = "";
+    if (privacy) privacy.style.outline = "";
 
     togglePetTypeOther();
 
@@ -781,6 +783,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const message = document.getElementById("message").value.trim();
       const accept = document.getElementById("accept").checked;
       const terms = document.getElementById("terms").checked;
+      const privacy = document.getElementById("privacy").checked;
       const colorBox = document.getElementById("colorBox").value;
       const postalCode = document.getElementById("postalCode").value.trim();
       const colonia = document.getElementById("colonia")?.value.trim() || "";
@@ -817,7 +820,7 @@ document.addEventListener("DOMContentLoaded", () => {
           (accept
             ? `💰 Acepto dar $100 de anticipo para que agenden mi pedido\n`
             : "") +
-          (terms
+          (terms && privacy
             ? `✅ Leí y acepto los Términos y condiciones y el Aviso de Privacidad`
             : ""),
       );
@@ -870,6 +873,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const petActivity = document.getElementById("petActivity");
     const accept = document.getElementById("accept");
     const terms = document.getElementById("terms");
+    const privacy = document.getElementById("privacy");
     const colorBox = document.getElementById("colorBox");
 
     if (!ownerName.value.trim()) {
@@ -924,10 +928,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (!terms.checked) {
       terms.style.outline = "2px solid #e74c3c";
-      showError(terms, "Acepta los Términos y condiciones y el Aviso de Privacidad.");
+      showError(terms, "Acepta los Términos y condiciones.");
       valid = false;
     } else {
       terms.style.outline = "";
+    }
+    if (!privacy.checked) {
+      privacy.style.outline = "2px solid #e74c3c";
+      showError(privacy, "Acepta el Aviso de Privacidad.");
+      valid = false;
+    } else {
+      privacy.style.outline = "";
     }
     return valid;
   }
